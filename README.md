@@ -27,7 +27,7 @@ Previous changes
 
 ## Original (George Howell)
 
-At time of writing, all mirrors of original seem to be down... Fortunately Steve published th updated code (as linked above) so that open source idea of the software could continue:
+At time of writing, all mirrors of original seem to be down... Fortunately Steve published the updated code (as linked above) so that open source idea of the software could continue:
 
 > I've cobbled together a jukebox title stripper for use via the web.
 It is located at:
