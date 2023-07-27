@@ -1,31 +1,46 @@
 # simplestripper
 
-try:
-* http://www.fpdf.org/en/tutorial/tuto7.htm
-* https://www.dafont.com/metal-lord.font
+Generator for Jukebox title strips. You can see the working versin over at: [simplestripper.roman-halliday.com](https://simplestripper.roman-halliday.com/)
 
-Generator for Jukebox title strips. 
-
-SimpleStripper v 2.4 (New as of 02/27/2020) Extensively Modified by Stephen Rice.
-(Originally written by George Howell).
-
-This code mirrored from: http://www.n4yza.com/jukebox/jukebox_labels/index.html
+Uses [fpdf](http://www.fpdf.org/) with an input form to generate a pdf file with customisable jukebox strips.
 
 See the attached license file(s) for GNU GPL license.
 
-Uses fpdf: http://www.fpdf.org/
+## V3 Changes
+
+### V3.0.0
+
+1. New php driven input form (html page archived to html4form.html)
+2. Discogs.com integration (give a url for discogs and fetch data)
+3. Update indec page to use HTML 5 & bootstrap
+4. Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex)
+5. Show/hide columns for publisher (A lesser used function to make form cleaner)
+6. Added an option to convert all artist and/or track names to upper case
+
+### Future Changes & Ideas
+
+* Cleanup layout of options for labels
+* Better use of bootstrap for ease of use and navigation (also make it pretty)
+* Add/enhance fonts, try:
+  * http://www.fpdf.org/en/tutorial/tuto7.htm
+   * https://www.dafont.com/metal-lord.font
+* Import artwork from discogs
+* Make more options global OR label speciffic (such as hit/other markings)
+* Artist/track speciffic fonts (optional)
+* Image based backgrund for labels rather than drawing them (more options)
+* Rework drawing to allow for:
+  * More dynamic sizing
+  * Ink saving (don't print empty boxes)
+  * Combined image/text only labels
 
 ## V2 Changes (Stephen Rice)
 
-As of 02/27/2020, extensively modified by Stephen Rice.
+Extensively modified by Stephen Rice.
 
-Starting with version 2.4 The following major changes have been implemented:
+At version 2.4 (02/27/2020) the following major changes had been implemented:
 1. You now can print a page without any lines on it in case you prefer to use pre printed labels.
 2. Updates have been done to remain compliant with the newer php server software.
 3. Included a updated FPDF version 1.82 software that handles printing in the zip file.
-
-Previous changes
-
 4. You now have color pickers available so that you can change colors of different parts of the label. You should click on the color and pick a color and when done either click off the color or click r tab key. This allows you to have many more choices for the colors would like to print.
 5. The labels will now open in a new window so that all the information you have entered is still available if you want to make changes.
 
