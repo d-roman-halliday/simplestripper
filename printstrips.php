@@ -6,13 +6,12 @@
  * @copyright 2023
  */
 
-// Please note that this version has been tweaked by David Roman-Halliday (mostly formatting)
-// Mostly previously modified to work in the new php where global variables are not allowed
-// This modification was done by Stephen Rice at n4yza.com and you can contact him on that web site.
+// Please note that this version has been tweaked by David Roman-Halliday (adding new functionality)
+// Peviously modified to work in the new php where global variables are not allowed by Stephen Rice at n4yza.com and you can contact him on that web site.
 // Originally written by George Howell
 
 // get some bookkeeping out of the way
-// This is Version 1.9
+// This is Version 1.10 (still backwards compatible)
 
 define('FPDF_FONTPATH', 'fpdf/font/');
 require "fpdf/fpdf.php";
@@ -47,12 +46,32 @@ $rightbar = $_POST['rightbar'];
 $labeltype = $_POST['labeltype'];
 $prelabel = $_POST['prelabel'];
 $imagename = $_POST['imagename'];
+$artistBoxStyle = $_POST['artistBoxStyle'];
+
+if ($artistBoxStyle == "") {
+    $artistBoxStyle = 'arrows';
+}
+
+if(isset($_POST['artist_upper']) && $_POST['artist_upper'] == 'artist_upper_case') {
+    $artist_upper_case = true;
+}
+else {
+    $artist_upper_case = false;
+}
+
+if(isset($_POST['track_upper']) && $_POST['track_upper'] == 'track_upper_case') {
+    $track_upper_case = true;
+}
+else {
+    $track_upper_case = false;
+}
+
 $font_style = $fontbold . $fontitalic . $fontunderline;
 //
 // start building pdf
 $pdf = new ZPDF('P', 'pt', 'Letter');
 $pdftitle = 'Jukebox Title Strips';
-$author = 'Simple Stripper Version 1.9 Modified by Stephen Rice (tweaks from David Roman-Halliday)';
+$author = 'Simple Stripper Version 1.10 Modified by David Roman-Halliday';
 
 $pdf->SetTitle($pdftitle);
 $pdf->SetAuthor($author);
@@ -79,6 +98,7 @@ $a = hex2rgb($framecolor);
 $stripr = $a[0];
 $stripg = $a[1];
 $stripb = $a[2];
+
 // #########################################
 // Start set the background COLOR ROUTINE
 // #########################################
@@ -107,6 +127,7 @@ if ($background) {
         $pdf->Rect(308, 26 + $colorbgr * 72, 212, 60, 'FD');
     }
 }
+
 // #########################################
 // End Paint the Background Routine
 // #########################################
@@ -118,7 +139,7 @@ switch ($labeltype) {
         // Start Print Text Labels Routine
         // #########################################
         for ($horiz = 0; $horiz <= 1; $horiz ++) {
-            // and do it nine times for ten rows
+            // and do it zero to nine times for ten rows
             for ($vert = 0; $vert <= 9; $vert ++) {
                 $pdf->SetFont($titlefont, $font_style, $fontsize);
                 if ($prelabel == "") {
@@ -132,8 +153,9 @@ switch ($labeltype) {
                         $pdf->Line(18 + $horiz * 288, 22 + $vert * 72, 234 + $horiz * 288, 22 + $vert * 72);
                     }
                     $pdf->Line(18 + $horiz * 288, 90 + $vert * 72, 234 + $horiz * 288, 90 + $vert * 72);
+
                     // #########################################
-                    // End Top and BOttom Line Routine
+                    // End Top and Bottom Line Routine
                     // #########################################
 
                     // ###########################################################
@@ -152,58 +174,145 @@ switch ($labeltype) {
                     // #########################################
                     // START Make the Box for the Artist Routine
                     // #########################################
-                    $pdf->SetLineWidth(1);
-                    if ($artistbgr) {
-                        $pdf->SetFillColor($artiststripbgr, $artiststripbgg, $artiststripbgb);
-                        $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                        $pdf->Rect(39 + $horiz * 288, 45 + $vert * 72, 168, 18, 'DF');
-                        $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                    } else {
-                        $pdf->SetFillColor(255, 255, 255);
-                        $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                        $pdf->Rect(39 + $horiz * 288, 45 + $vert * 72, 168, 18, 'DF');
+
+                    $ab_draw_arrows = True;
+                    $ab_draw_box = True;
+                    $ab_draw_hex = False;
+
+                    switch ($artistBoxStyle) {
+                        case "arrows":
+                            $ab_draw_arrows = True;
+                            $ab_draw_box = True;
+                            $ab_draw_hex = False;
+                            break;
+                        case "rect":
+                            $ab_draw_arrows = False;
+                            $ab_draw_box = True;
+                            $ab_draw_hex = False;
+                            break;
+                        case "hex":
+                            $ab_draw_arrows = False;
+                            $ab_draw_box = False;
+                            $ab_draw_hex = True;
+                            break;
                     }
+
+
+                    $pdf->SetLineWidth(1);
+
+                    if ($ab_draw_box) {
+                        if ($artistbgr) {
+                            $pdf->SetFillColor($artiststripbgr, $artiststripbgg, $artiststripbgb);
+                            $pdf->SetDrawColor($stripr, $stripg, $stripb);
+                            $pdf->Rect(39 + $horiz * 288, 45 + $vert * 72, 168, 18, 'DF');
+                        } else {
+                            $pdf->SetFillColor(255, 255, 255);//blank fill
+                            $pdf->SetDrawColor($stripr, $stripg, $stripb);
+                            $pdf->Rect(39 + $horiz * 288, 45 + $vert * 72, 168, 18, 'DF');
+                        }
+
+                        // ##############################################
+                        // START PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
+                        // ##############################################
+                        $pdf->SetFillColor($stripr, $stripg, $stripb);
+                        $pdf->Rect(17 + $horiz * 288, 50 + $vert * 72, 22, 9, 'FD');
+                        $pdf->Rect(207 + $horiz * 288, 50 + $vert * 72, 28, 9, 'FD');
+                        // ##############################################
+                        // END PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
+                        // ##############################################
+                    }
+
+                    if ($ab_draw_arrows) {
+                        // ######################################
+                        // /Start Make Arrow Heads for Artist Box
+                        // ######################################
+                        for ($arrow = 0; $arrow <= 12; $arrow ++) {
+                            $pdf->Line(39.2 + $horiz * 288, $arrow + 48 + $vert * 72, 44 + $horiz * 288, 55 + $vert * 72);
+                            $pdf->Line(206.2 + $horiz * 288, $arrow + 48 + $vert * 72, 201 + $horiz * 288, 55 + $vert * 72);
+                        }
+                        // ######################################
+                        // /END Make Arrow Heads for Artist Box
+                        // ######################################
+                    }
+
+                    if ($ab_draw_hex) {
+                        // #########################################
+                        // Long Hex -- Note: $artistbgr not implemented
+                        // Alternative approach, polygon function: http://www.fpdf.org/en/script/script60.php
+                        // #########################################
+                        //$pdf->Line(39 + $horiz * 288, 45 + $vert * 72     , 39 + $horiz * 288 + 168, 45 + $vert * 72     );
+                        //$pdf->Line(39 + $horiz * 288, 45 + $vert * 72 + 18, 39 + $horiz * 288 + 168, 45 + $vert * 72 + 18);
+
+                        // Reference point naming
+                        // _t = top    _l = left  _h = horizontal
+                        // _b = bottom _r = right _v = vertical
+
+                        $point_t_l_h = 39 + $horiz * 288;
+                        $point_t_l_v = 45 + $vert * 72;
+                        $point_b_l_h = $point_t_l_h;
+                        $point_b_l_v = $point_t_l_v + 18;
+
+                        $point_m_l_h = $point_t_l_h - 9;
+                        $point_m_l_v = $point_t_l_v + 9;
+
+                        $point_t_r_h = $point_t_l_h + 168;
+                        $point_t_r_v = $point_t_l_v;
+                        $point_b_r_h = $point_t_r_h;
+                        $point_b_r_v = $point_b_l_v;
+
+                        $point_m_r_h = $point_b_r_h + 9;
+                        $point_m_r_v = $point_t_r_v + 9;
+
+                        $pdf->Line($point_t_l_h, $point_t_l_v, $point_t_r_h, $point_t_r_v);
+                        $pdf->Line($point_b_l_h, $point_b_l_v, $point_b_r_h, $point_b_r_v);
+                        $pdf->Line($point_t_l_h, $point_t_l_v, $point_m_l_h, $point_m_l_v);
+                        $pdf->Line($point_b_l_h, $point_b_l_v, $point_m_l_h, $point_m_l_v);
+                        $pdf->Line($point_t_r_h, $point_t_r_v, $point_m_r_h, $point_m_r_v);
+                        $pdf->Line($point_b_r_h, $point_b_r_v, $point_m_r_h, $point_m_r_v);
+
+                        // ##############################################
+                        // START PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
+                        // ##############################################
+                        $point_f_l_h = 18 + $horiz * 288;
+                        $point_f_l_v = $point_m_l_v;
+
+                        $point_f_r_h = 236 + $horiz * 288;
+                        $point_f_r_v = $point_m_l_v;
+
+                        // Use a fat line to start with
+                        $pdf->SetLineWidth(2);
+                        $pdf->Line($point_f_l_h - 1, $point_f_l_v, $point_m_l_h - 1, $point_m_l_v);
+                        $pdf->Line($point_f_r_h + 1, $point_f_r_v, $point_m_r_h + 1, $point_m_r_v);
+
+                        //set it back to make the box wider (with custom offsets to work around the hex shape)
+                        $pdf->SetLineWidth(1);
+                        $pdf->Line($point_f_l_h - 1, $point_f_l_v -   2, $point_m_l_h + 1.5, $point_m_l_v -   2);
+                        $pdf->Line($point_f_l_h - 1, $point_f_l_v - 1.5, $point_m_l_h +   1, $point_m_l_v - 1.5);
+                        $pdf->Line($point_f_l_h - 1, $point_f_l_v -   1, $point_m_l_h + 0.5, $point_m_l_v -   1);
+                        $pdf->Line($point_f_l_h - 1, $point_f_l_v +   1, $point_m_l_h + 0.5, $point_m_l_v +   1);
+                        $pdf->Line($point_f_l_h - 1, $point_f_l_v + 1.5, $point_m_l_h +   1, $point_m_l_v + 1.5);
+                        $pdf->Line($point_f_l_h - 1, $point_f_l_v +   2, $point_m_l_h + 1.5, $point_m_l_v +   2);
+
+                        $pdf->Line($point_f_r_h + 1, $point_f_r_v -   2, $point_m_r_h - 1.5, $point_m_r_v -   2);
+                        $pdf->Line($point_f_r_h + 1, $point_f_r_v - 1.5, $point_m_r_h -   1, $point_m_r_v - 1.5);
+                        $pdf->Line($point_f_r_h + 1, $point_f_r_v -   1, $point_m_r_h - 0.5, $point_m_r_v -   1);
+                        $pdf->Line($point_f_r_h + 1, $point_f_r_v +   1, $point_m_r_h - 0.5, $point_m_r_v +   1);
+                        $pdf->Line($point_f_r_h + 1, $point_f_r_v + 1.5, $point_m_r_h -   1, $point_m_r_v + 1.5);
+                        $pdf->Line($point_f_r_h + 1, $point_f_r_v +   2, $point_m_r_h - 1.5, $point_m_r_v +   2);
+
+                        // ##############################################
+                        // END PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
+                        // ##############################################
+                    }
+
                     // #########################################
                     // End Make Box for Artist Routine
                     // #########################################
 
-                    // ##############################################
-                    // START PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
-                    // ##############################################
+                } // end if prelabe
 
-                    // bars on side of artist box
-                    $pdf->SetFillColor($stripr, $stripg, $stripb);
-                    $pdf->Rect(17 + $horiz * 288, 50 + $vert * 72, 22, 9, 'FD');
-                    $pdf->Rect(207 + $horiz * 288, 50 + $vert * 72, 28, 9, 'FD');
-                    // ##############################################
-                    // END PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
-                    // ##############################################
-
-                    // ##############################################
-                    // START Print the left and right bars if wanted
-                    // ##############################################
-                    $recordtoprint = (($horiz * 10) + $vert + 1);
-                    $pdf->SetXY(18 + $horiz * 288, 54 + $vert * 72);
-                    $pdf->SetTextColor(255, 255, 255);
-                    $pdf->SetXY(18 + $horiz * 288, 54 + $vert * 72);
-                    $pdf->CellZ(20, 0, $leftbar[$recordtoprint], '', '', 'C');
-                    $pdf->SetXY(208 + $horiz * 288, 54 + $vert * 72);
-                    $pdf->CellZ(20, 0, $rightbar[$recordtoprint], '', '', 'C');
-                    // ##############################################
-                    // END Print the left and right bars if wanted
-                    // ##############################################
-
-                    // ######################################
-                    // /Start Make Arrow Heads for Artist Box
-                    // ######################################
-                    for ($arrow = 0; $arrow <= 12; $arrow ++) {
-                        $pdf->Line(39.2 + $horiz * 288, $arrow + 48 + $vert * 72, 44 + $horiz * 288, 55 + $vert * 72);
-                        $pdf->Line(206.2 + $horiz * 288, $arrow + 48 + $vert * 72, 201 + $horiz * 288, 55 + $vert * 72);
-                    }
-                    // ######################################
-                    // /END Make Arrow Heads for Artist Box
-                    // ######################################
-                } // end if prelabel
+                // next line picks which record to print based on which cell we are working on
+                $recordtoprint = (($horiz * 10) + $vert + 1);
 
                 // #########################################
                 // START Change Font Color Routine
@@ -219,21 +328,29 @@ switch ($labeltype) {
                 // END Font Color Routine
                 // #########################################
 
-                // ##############################################
-                // END Print the Type and hit if wanted
-                // ##############################################
+                // ####################################################
+                // /Start Print The Titles
+                // ####################################################
 
-                // next line picks which record to print based on which cell we are working on
-                $recordtoprint = (($horiz * 10) + $vert + 1);
                 // next lines sets top left corner of box. Extra y offset to get off
                 // of lines. line after that prints title of a side
                 $pdf->SetXY(18 + $horiz * 288, 34 + $vert * 72);
                 $titlea[$recordtoprint] = stripslashes($titlea[$recordtoprint]);
+                if ($track_upper_case) {
+                    $titlea[$recordtoprint] = strtoupper($titlea[$recordtoprint]);
+                }
                 $pdf->CellZ(212, 0, $titlea[$recordtoprint], '', '', 'C');
                 // set position and print title of b side
                 $pdf->SetXY(18 + $horiz * 288, 73 + $vert * 72);
                 $titleb[$recordtoprint] = stripslashes($titleb[$recordtoprint]);
+                if ($track_upper_case) {
+                    $titleb[$recordtoprint] = strtoupper($titleb[$recordtoprint]);
+                }
                 $pdf->CellZ(212, 0, $titleb[$recordtoprint], '', '', 'C');
+
+                // ####################################################
+                // /End Print The Titles
+                // ####################################################
 
                 // ####################################################
                 // /Start Print The Artists, Publisher and Publisher ID
@@ -249,6 +366,9 @@ switch ($labeltype) {
                     $combinedartist = ("");
                 }
                 $combinedartist = stripslashes($combinedartist);
+                if ($artist_upper_case) {
+                    $combinedartist = strtoupper($combinedartist);
+                }
                 $pdf->SetXY(44 + $horiz * 288, 54 + $vert * 72);
                 $pdf->CellZ(156, 0, $combinedartist, '', '', 'C');
                 $publisherinfo = "$publisher[$recordtoprint] $publisherid[$recordtoprint]";
@@ -256,6 +376,25 @@ switch ($labeltype) {
                 $pdf->SetFont('Helvetica', '', 6);
                 $pdf->SetXY(174 + $horiz * 288, 86 + $vert * 72);
                 $pdf->CellZ(60, 0, $publisherinfo, '', '', 'L');
+
+                // ##############################################
+                // START Print the Type and hit if wanted
+                // ##############################################
+
+                // Set text color to white (transparent on paper)
+                $pdf->SetTextColor(255, 255, 255);
+                // next lines sets top left corner of box. Extra y offset to get off
+                // of lines. line after that prints left bar content
+                $pdf->SetXY(18 + $horiz * 288, 54 + $vert * 72);
+                $pdf->CellZ(20, 0, $leftbar[$recordtoprint], '', '', 'C');
+                // Do the same with the right
+                $pdf->SetXY(208 + $horiz * 288, 54 + $vert * 72);
+                $pdf->CellZ(20, 0, $rightbar[$recordtoprint], '', '', 'C');
+
+                // ##############################################
+                // END Print the Type and hit if wanted
+                // ##############################################
+
             }
         }
         // #########################################
@@ -356,10 +495,16 @@ switch ($labeltype) {
 
                 $pdf->SetXY(84 + $horiz * 288, 34 + $vert * 72);
                 $titlea[$recordtoprint] = stripslashes($titlea[$recordtoprint]);
+                if ($track_upper_case) {
+                    $titlea[$recordtoprint] = strtoupper($titlea[$recordtoprint]);
+                }
                 $pdf->CellZ(148, 0, $titlea[$recordtoprint], '', '', 'C');
                 // set position and print title of b side
                 $pdf->SetXY(84 + $horiz * 288, 73 + $vert * 72);
                 $titleb[$recordtoprint] = stripslashes($titleb[$recordtoprint]);
+                if ($track_upper_case) {
+                    $titleb[$recordtoprint] = strtoupper($titleb[$recordtoprint]);
+                }
                 $pdf->CellZ(148, 0, $titleb[$recordtoprint], '', '', 'C');
 
                 // ####################################################
@@ -376,6 +521,9 @@ switch ($labeltype) {
                     $combinedartist = ("");
                 }
                 $combinedartist = stripslashes($combinedartist);
+                if ($artist_upper_case) {
+                    $combinedartist = strtoupper($combinedartist);
+                }
                 $pdf->SetXY(84 + $horiz * 288, 54 + $vert * 72);
                 $pdf->CellZ(148, 0, $combinedartist, '', '', 'C');
                 $publisherinfo = "$publisher[$recordtoprint] $publisherid[$recordtoprint]";
