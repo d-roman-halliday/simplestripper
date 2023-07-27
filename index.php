@@ -14,9 +14,11 @@ $debug_output = false;
 
         <!-- Styles -->
         <!-- Bootstrap CSS -->
-        <link  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <!--<link  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous" defer></script>
         <!-- make me pretty with: https://bootswatch.com/ -->
+        <!-- <link  href="css/bootstrap.css" rel="stylesheet">     -->
+        <!-- <link  href="css/bootstrap.min.css" rel="stylesheet"> -->
         <!-- End: Styles -->
 
         <!-- Scripts -->
@@ -38,6 +40,9 @@ $debug_output = false;
             </p>
             <p>
                 The original input form (HTML 4 by Stephen) has been renamed to <a href="html4form.html">html4form.html</a> and is still available.
+            </p>
+            <p>
+                There is a lot of work to do on the "look and feel", but I've focused on functionality gor now.
             </p>
         </div>
         <div class="container">
@@ -131,6 +136,32 @@ if ($debug_output) {
                         <li>New php driven input form (html page archived to html4form.html)</li>
                         <li>Discogs.com integration</li>
                         <li>HTML 5 &amp; bootstrap</li>
+                        <li>Customise output artist box styles, provide a box to select artist box style (Arrow, square, hex)</li>
+                        <li>Show hide columns (publisher) - https://stackoverflow.com/questions/41446362/hide-columns-in-bootstrap-table-at-startup</li>
+                        <li>Option to convert all artist and/or track names to upper case</li>
+                    </ul>
+                    <h4>
+                        Pending Changes for v3.0
+                    </h4>
+                    <ul>
+                        <li>Cleanup layout of options for labels</li>
+                    </ul>
+                    Planned Changes &amp; Suggestions for v3.1 and onwards
+                    <h4>
+                    </h4>
+                    <ul>
+                        <li>Import artwork from discogs</li>
+                        <li>Make more options global OR label speciffic (such as hit/other markings)</li>
+                        <li>More fonts</li>
+                        <li>Artist/track speciffic fonts (optional)</li>
+                        <li>Image based backgrund for labels rather than drawing them (more options)</li>
+                        <li>Rework drawing to allow for:
+                            <ul>
+                                <li>More dynamic sizing</li>
+                                <li>Ink saving (don't print empty boxes)</li>
+                                <li>combined image/text only labels</li>
+                            </ul>
+                        </li>
                     </ul>
                     <h3>Key Changes v2</h3>
                     <p>
@@ -389,7 +420,7 @@ foreach ($json_data_decoded_data as $item) { // foreach element in $arr
     if (strlen(trim($trackData['displayArtist'])) == 0) {
         $trackData['displayArtist'] = $trackData['releaseArtist'];
     }
-    
+
     if ($debug_output) {
         echo 'Track: ' . $trackData['trackPosition'] . ' = ' . $trackData['trackName'] . ' by '. $trackData['displayArtist'] .'(' . $trackData['trackArtist'] . ' | ' . $trackData['releaseArtist'] . ')</br>' . "\n";
     }
@@ -397,7 +428,7 @@ foreach ($json_data_decoded_data as $item) { // foreach element in $arr
     $trackArray[] = $trackData;
 
 }
-                    
+
 if ($debug_output) { echo '</p>' . "\n"; }
 
 ?>
@@ -407,6 +438,40 @@ if ($debug_output) { echo '</p>' . "\n"; }
 
         <div class="container pt-5">
         <h2>Main Form</h2>
+            <p>
+                Because the Publisher information isn't a common thing for people to use, I've hidden it from the form. 
+                You can show and hide the coluns using the buttons below, the visibility of the columns doesn't impact
+                anything in them or if it's sent to the label generator.
+            </p>
+            <div id="toolbar">
+                <button id="button1" class="btn btn-secondary" onclick="changeVisOn()">Show Publisher Columns</button>
+                <button id="button2" class="btn btn-secondary" onclick="changeVisOff()">Hide Publisher Columns</button>
+            </div>
+            <script>
+                function changeVisOn() {
+                    // What to do
+                    document.getElementById('p1_tr_00').style.display = 'table-cell';
+                    document.getElementById('p2_tr_00').style.display = 'table-cell';
+<?php
+                    for ($i = 1; $i <= 20; $i ++) {
+                        echo '                    document.getElementById("p1_tr_'.$i.'").style.display = "table-cell";'."\n";
+                        echo '                    document.getElementById("p2_tr_'.$i.'").style.display = "table-cell";'."\n";
+                        }
+?>
+
+                }
+                function changeVisOff() {
+                    // What to do
+                    document.getElementById('p1_tr_00').style.display = 'none';
+                    document.getElementById('p2_tr_00').style.display = 'none';
+<?php
+                    for ($i = 1; $i <= 20; $i ++) {
+                        echo '                    document.getElementById("p1_tr_'.$i.'").style.display = "none";'."\n";
+                        echo '                    document.getElementById("p2_tr_'.$i.'").style.display = "none";'."\n";
+                    }
+?>
+                }
+            </script>
         <form method="post" name="record_entry">
             <h3>Discogs</h3>
             <p>Get data from discogs and append to strip information. This will append to the rows below, note for now only artist and track names will be loaded and refreshed.</p>
@@ -418,7 +483,9 @@ if ($debug_output) { echo '</p>' . "\n"; }
             </p>
             <h3>Strip Details</h3>
             <p>This gets appended to using the discogs tool above, anything populated can be manuialy modified</p>
-            <table style="text-align: left; width: 100%;">
+            <table id="table"
+                   style="text-align: left; width: 100%;"
+                   >
                 <tbody>
                     <tr>
                         <td style="vertical-align: top;"><br></td>
@@ -426,8 +493,8 @@ if ($debug_output) { echo '</p>' . "\n"; }
                         <td style="vertical-align: top; font-weight: bold;">Title B</td>
                         <td style="vertical-align: top; font-weight: bold;">Artist A</td>
                         <td style="vertical-align: top; font-weight: bold;">Artist B</td>
-                        <td style="vertical-align: top; font-weight: bold;">Publisher</td>
-                        <td style="vertical-align: top; font-weight: bold;">Publisher ID</td>
+                        <td id="p1_tr_00" style="vertical-align: top; font-weight: bold; display:none">Publisher</td>
+                        <td id="p2_tr_00" style="vertical-align: top; font-weight: bold; display:none">Publisher ID</td>
                         <td style="vertical-align: top; font-weight: bold;">Left Bar</td>
                         <td style="vertical-align: top; font-weight: bold;">Right Bar</td>
                         <td style="vertical-align: top; font-weight: bold;">Image</td>
@@ -479,8 +546,8 @@ for ($i = 1; $i <= 20; $i ++) {
     echo '			<td style="vertical-align: top;"><input name="titleb['.$i.']"      value="'.$row_titleb.' "></td>';
     echo '			<td style="vertical-align: top;"><input name="artista['.$i.']"     value="'.$row_artista.'"></td>';
     echo '			<td style="vertical-align: top;"><input name="artistb['.$i.']"     value="'.$row_artistb.'"></td>';
-    echo '			<td style="vertical-align: top;"><input name="publisher['.$i.']"   ></td>';
-    echo '			<td style="vertical-align: top;"><input name="publisherid['.$i.']" ></td>';
+    echo '			<td id="p1_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisher['.$i.']"   ></td>';
+    echo '			<td id="p2_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisherid['.$i.']" ></td>';
     echo '			<td style="vertical-align: top;"><input name="leftbar['.$i.']"     ></td>';
     echo '			<td style="vertical-align: top;"><input name="rightbar['.$i.']"    ></td>';
     echo '			<td><select                             name="imagename['.$i.']">';
@@ -501,75 +568,96 @@ for ($i = 1; $i <= 20; $i ++) {
 
             <h3>Strip Output Settings</h3>
             <p>Don't change these until finished importing from discogs as they reset when fetching the data.</p>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>Frame Color</td>
-                        <td>Background</td>
-                        <td>Artist Background</td>
-                        <td>Font</td>
-                        <td>Font Color</td>
-                        <td>Print Size</td>
-                        <td>Bold</td>
-                        <td>Italic</td>
-                        <td>Underlined</td>
-                        <td>Image or Text</td>
-                        <td>Pre Printed Labels</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <br> <br> Click below to<br> change color.<br>
-                            <input name="framecolor" class="color" value="ff0000" >
-                        </td>
-                        <td>
-                            <input id="background_y" type="radio" name="background" value="TRUE"              ><label for="background_y">Yes</label><br>
-                            <input id="background_n" type="radio" name="background" value="" checked="checked"><label for="background_n">No</label><br>Click below to<br> change color.<br>
-                            <input name="backgroundcolor" class="color" value="FFC0CB">
-                        </td>
-                        <td>
-                            <input id="artbackground_y" type="radio" name="artbackground" value="TRUE"               ><label for="artbackground_y">Yes</label><br>
-                            <input id="artbackground_n" type="radio" name="artbackground" value="" checked="checked" ><label for="artbackground_n">No</label><br> Click below to<br> change
-                            color.<br> <input name="artistbackgroundcolor" class="color" value="FFC0CB" >
-                        </td>
-                        <td>
-                            <input id="font_01" type="radio" name="titlefont" value="Times"                    ><label for="font_01">Times</label><br>
-                            <input id="font_02" type="radio" name="titlefont" value="Helvetica"                ><label for="font_02">Helvetica</label><br>
-                            <input id="font_03" type="radio" name="titlefont" value="Courier" checked="checked"><label for="font_03">Courier</label><br>
-                        </td>
-                        <td>
-                            <br> <br> Click below to<br> change color.<br>
-                            <input name="fontcolor" class="color" value="000000" >
-                        </td>
-                        <td>
-                            <input id="title_s" type="radio" name="titlesize" value="small"                    ><label for="title_s">Small</label><br>
-                            <input id="title_m" type="radio" name="titlesize" value="medium" checked="checked" ><label for="title_m">Medium</label><br>
-                            <input id="title_l" type="radio" name="titlesize" value="large"                    ><label for="title_l">Large</label><br></td>
-                        <td>
-                            <input id="fontbold_y" type="radio" name="fontbold" value="B"                  ><label for="fontbold_y">Yes</label><br>
-                            <input id="fontbold_n" type="radio" name="fontbold" value="" checked="checked" ><label for="fontbold_n">No</label><br>
-                        </td>
-                        <td>
-                            <input id="fontitalic_y" type="radio" name="fontitalic" value="I"                  ><label for="fontitalic_y">Yes</label><br>
-                            <input id="fontitalic_n" type="radio" name="fontitalic" value="" checked="checked" ><label for="fontitalic_n">No</label><br>
-                        </td>
-                        <td>
-                            <input id="fontunderline_y" type="radio" name="fontunderline" value="U"                  ><label for="fontunderline_y">Yes</label><br>
-                            <input id="fontunderline_n" type="radio" name="fontunderline" value="" checked="checked" ><label for="fontunderline_n">No</label><br>
-                        </td>
-                        <td>
-                            <input id="labeltype_t" type="radio" name="labeltype" value="text" checked="checked" ><label for="labeltype_t">TEXT</label><br>
-                            <input id="labeltype_i" type="radio" name="labeltype" value="image"                  ><label for="labeltype_i">IMAGE</label><br>
-                        </td>
-                        <td>
-                            <input id="prelabel_y" type="radio" name="prelabel" value="Y"                  ><label for="prelabel_y">Yes</label><br>
-                            <input id="prelabel_n" type="radio" name="prelabel" value="" checked="checked" ><label for="prelabel_n">No</label><br>
-                        </td>
-                    </tr>
-            </table>
 
-            <!--  Reset doesn't work if form is already populated at start, javascript could help -->
-            <!-- <button name="Reset"  type="reset">Clear All Fields</button>-->
-            <button name="Submit" type="submit" formaction="printstrips.php" formtarget="_blank">Create PDF</button>
+            <h4>
+                Frame Color
+            </h4>
+            <p>
+                <label for="framecolor_p">Select color:</label>
+                <input id="framecolor_p" name="framecolor" class="color" value="ff0000" >
+            </p>
+            <h4>
+                Background
+            </h4>
+            <input id="background_y" type="radio" name="background" value="TRUE"              ><label for="background_y">Yes</label><br>
+            <input id="background_n" type="radio" name="background" value="" checked="checked"><label for="background_n">No</label><br>
+            <label for="bgcolor_p">Select color:</label>
+            <input id="bgcolor_p" name="backgroundcolor" class="color" value="FFC0CB">
+            <h4>
+                Artist Background
+            </h4>
+            <input id="artbackground_y" type="radio" name="artbackground" value="TRUE"               ><label for="artbackground_y">Yes</label><br>
+            <input id="artbackground_n" type="radio" name="artbackground" value="" checked="checked" ><label for="artbackground_n">No</label><br>
+            <label for="artistbackgroundcolor_p">Select color:</label>
+            <input id="artistbackgroundcolor_p" name="artistbackgroundcolor" class="color" value="FFC0CB" >
+            <h4>
+                Font
+            </h4>
+            <input id="font_01" type="radio" name="titlefont" value="Times"                    ><label for="font_01">Times</label><br>
+            <input id="font_02" type="radio" name="titlefont" value="Helvetica"                ><label for="font_02">Helvetica</label><br>
+            <input id="font_03" type="radio" name="titlefont" value="Courier" checked="checked"><label for="font_03">Courier</label>
+            <h4>
+                Font Color
+            </h4>
+            <label for="fontcolor_p">Select color:</label>
+            <input id="fontcolor_p" name="fontcolor" class="color" value="000000" >
+            <h4>
+                Print Size
+            </h4>
+            <input id="title_s" type="radio" name="titlesize" value="small"                    ><label for="title_s">Small</label><br>
+            <input id="title_m" type="radio" name="titlesize" value="medium" checked="checked" ><label for="title_m">Medium</label><br>
+            <input id="title_l" type="radio" name="titlesize" value="large"                    ><label for="title_l">Large</label><br>
+            <h4>
+                Bold
+            </h4>
+            <input id="fontbold_y" type="radio" name="fontbold" value="B"                  ><label for="fontbold_y">Yes</label><br>
+            <input id="fontbold_n" type="radio" name="fontbold" value="" checked="checked" ><label for="fontbold_n">No</label><br>
+            <h4>
+                Italic
+            </h4>
+            <input id="fontitalic_y" type="radio" name="fontitalic" value="I"                  ><label for="fontitalic_y">Yes</label><br>
+            <input id="fontitalic_n" type="radio" name="fontitalic" value="" checked="checked" ><label for="fontitalic_n">No</label>
+            <h4>
+                Underlined
+            </h4>
+            <input id="fontunderline_y" type="radio" name="fontunderline" value="U"                  ><label for="fontunderline_y">Yes</label><br>
+            <input id="fontunderline_n" type="radio" name="fontunderline" value="" checked="checked" ><label for="fontunderline_n">No</label>
+            <h4>
+                Image or Text
+            </h4>
+            <input id="labeltype_t" type="radio" name="labeltype" value="text" checked="checked" ><label for="labeltype_t">TEXT</label><br>
+            <input id="labeltype_i" type="radio" name="labeltype" value="image"                  ><label for="labeltype_i">IMAGE</label>
+            <h4>
+                Pre Printed Labels
+            </h4>
+            <input id="prelabel_y" type="radio" name="prelabel" value="Y"                  ><label for="prelabel_y">Yes</label><br>
+            <input id="prelabel_n" type="radio" name="prelabel" value="" checked="checked" ><label for="prelabel_n">No</label>
+            <h4>
+                Artist Box
+            </h4>
+            <p>
+                <label for="artistBoxStyle_id">Artist box format:</label>
+                <select name="artistBoxStyle" id="artistBoxStyle_id">
+                    <option value="arrows">Rectangle with arrows</option>
+                    <option value="rect">Rectangle (no arrows)</option>
+                    <option value="hex">Hexagonal (long)</option>
+                </select>
+            </p>
+            <h4>
+                Text settings
+            </h4>
+            <p>
+                <label for="artist_upper_id">Convert all artist names to upper case</label>
+                <input type="checkbox" id="artist_upper_id" name="artist_upper" value="artist_upper_case">
+                <br>
+                <label for="track_upper_id">Convert all track names to upper case</label>
+                <input type="checkbox" id="track_upper_id" name="track_upper" value="track_upper_case">
+            </p>
+            <p>
+                <!--  Reset doesn't work if form is already populated at start, javascript could help -->
+                <!-- <button name="Reset"  type="reset">Clear All Fields</button>-->
+                <button name="Submit" type="submit" formaction="printstrips.php" formtarget="_blank">Create PDF</button>
+            </p>
 
         </form>
         </div>

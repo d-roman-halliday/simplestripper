@@ -1,5 +1,9 @@
 # simplestripper
 
+try:
+* http://www.fpdf.org/en/tutorial/tuto7.htm
+* https://www.dafont.com/metal-lord.font
+
 Generator for Jukebox title strips. 
 
 SimpleStripper v 2.4 (New as of 02/27/2020) Extensively Modified by Stephen Rice.
