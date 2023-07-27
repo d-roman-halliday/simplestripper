@@ -42,7 +42,7 @@ $debug_output = false;
                 The original input form (HTML 4 by Stephen) has been renamed to <a href="html4form.html">html4form.html</a> and is still available.
             </p>
             <p>
-                There is a lot of work to do on the "look and feel", but I've focused on functionality gor now.
+                There is a lot of work to do on the "look and feel", but I've focused on functionality for now.
             </p>
         </div>
         <div class="container">
@@ -134,20 +134,14 @@ if ($debug_output) {
                     <h3>Key Changes v3</h3>
                     <ul>
                         <li>New php driven input form (html page archived to html4form.html)</li>
-                        <li>Discogs.com integration</li>
-                        <li>HTML 5 &amp; bootstrap</li>
-                        <li>Customise output artist box styles, provide a box to select artist box style (Arrow, square, hex)</li>
-                        <li>Show hide columns (publisher) - https://stackoverflow.com/questions/41446362/hide-columns-in-bootstrap-table-at-startup</li>
-                        <li>Option to convert all artist and/or track names to upper case</li>
+                        <li>Discogs.com integration (give a url for discogs and fetch data)</li>
+                        <li>Update indec page to use HTML 5 & bootstrap</li>
+                        <li>Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex)</li>
+                        <li>Show/hide columns for publisher (A lesser used function to make form cleaner)</li>
+                        <li>Added an option to convert all artist and/or track names to upper case</li>
                     </ul>
                     <h4>
-                        Pending Changes for v3.0
-                    </h4>
-                    <ul>
-                        <li>Cleanup layout of options for labels</li>
-                    </ul>
-                    Planned Changes &amp; Suggestions for v3.1 and onwards
-                    <h4>
+                        Planned Changes &amp; Suggestions for v3.1 and onwards
                     </h4>
                     <ul>
                         <li>Import artwork from discogs</li>
