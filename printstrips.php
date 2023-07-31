@@ -356,20 +356,30 @@ switch ($labeltype) {
                 // /Start Print The Artists, Publisher and Publisher ID
                 // ####################################################
                 // combine artist a and b into one string if needed
-                if ($artista[$recordtoprint] && $artistb[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]/$artistb[$recordtoprint]");
-                } elseif ($artista[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]");
-                } elseif ($artistb[$recordtoprint]) {
-                    $combinedartist = ("$artistb[$recordtoprint]");
+		
+		$this_artist_a = trim(stripslashes($artista[$recordtoprint]));
+                $this_artist_b = trim(stripslashes($artistb[$recordtoprint]));
+
+                //if ($strlen($this_artist_a) > 0 && strlen($this_artist_b) > 0 && $this_artist_a == $this_artist_b) {
+                //    $combinedartist = "$this_artist_a";
+		//} elseif (strlen($this_artist_a) > 0 && strlen($this_artist_b) > 0) {
+		if (strlen($this_artist_a) > 0 && strlen($this_artist_b) > 0) {
+                    $combinedartist = "$this_artist_a/$this_artist_b";
+                } elseif (strlen($this_artist_a) > 0) {
+                    $combinedartist = "$this_artist_a";
+                } elseif (strlen($this_artist_b) > 0) {
+                    $combinedartist = "$this_artist_b";
                 } else {
-                    $combinedartist = ("");
+   			$combinedartist = ("");
                 }
-                $combinedartist = stripslashes($combinedartist);
-                if ($artist_upper_case) {
+ 
+		$combinedartist = stripslashes($combinedartist);
+
+		if ($artist_upper_case) {
                     $combinedartist = strtoupper($combinedartist);
                 }
-                $pdf->SetXY(44 + $horiz * 288, 54 + $vert * 72);
+	
+		$pdf->SetXY(44 + $horiz * 288, 54 + $vert * 72);
                 $pdf->CellZ(156, 0, $combinedartist, '', '', 'C');
                 $publisherinfo = "$publisher[$recordtoprint] $publisherid[$recordtoprint]";
                 $publisherinfo = stripslashes($publisherinfo);
@@ -510,20 +520,29 @@ switch ($labeltype) {
                 // ####################################################
                 // /Start Print The Artists, Publisher and Publisher ID
                 // ####################################################
-                // combine artist a and b into one string if needed
-                if ($artista[$recordtoprint] && $artistb[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]/$artistb[$recordtoprint]");
-                } elseif ($artista[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]");
-                } elseif ($artistb[$recordtoprint]) {
-                    $combinedartist = ("$artistb[$recordtoprint]");
+		// combine artist a and b into one string if needed 
+		
+		$this_artist_a = trim(stripslashes($artista[$recordtoprint]));
+		$this_artist_b = trim(stripslashes($artistb[$recordtoprint]));
+
+		if ($strlen($this_artist_a) > 0 && strlen($this_artist_b) > 0 && $this_artist_a == $this_artist_b) { //Dedupe
+			$combinedartist = $this_artist_a;
+		} elseif (strlen($this_artist_a) > 0 && strlen($this_artist_b) > 0) {
+                    $combinedartist = "$this_artist_a/$this_artist_b";
+                } elseif (strlen($this_artist_a) > 0) {
+                    $combinedartist = "$this_artist_a";
+                } elseif (strlen($this_artist_b) > 0) {
+                    $combinedartist = "$this_artist_b";
                 } else {
                     $combinedartist = ("");
                 }
-                $combinedartist = stripslashes($combinedartist);
+		
+		$combinedartist = stripslashes($combinedartist);
+
                 if ($artist_upper_case) {
                     $combinedartist = strtoupper($combinedartist);
-                }
+		}
+		
                 $pdf->SetXY(84 + $horiz * 288, 54 + $vert * 72);
                 $pdf->CellZ(148, 0, $combinedartist, '', '', 'C');
                 $publisherinfo = "$publisher[$recordtoprint] $publisherid[$recordtoprint]";
