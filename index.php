@@ -542,25 +542,25 @@ for ($i = 1; $i <= 20; $i ++) {
     $row_artista = htmlentities($row_artista);
     $row_artistb = htmlentities($row_artistb);
 
-    echo '		<tr>';
-    echo '			<td style="vertical-align: top; text-align: right; font-weight: bold;">'.$i.'</td>';
-    echo '			<td style="vertical-align: top;"><input name="titlea['.$i.']"      value="'.$row_titlea.'"></td>';
-    echo '			<td style="vertical-align: top;"><input name="titleb['.$i.']"      value="'.$row_titleb.'"></td>';
-    echo '			<td style="vertical-align: top;"><input name="artista['.$i.']"     value="'.$row_artista.'"></td>';
-    echo '			<td style="vertical-align: top;"><input name="artistb['.$i.']"     value="'.$row_artistb.'"></td>';
-    echo '			<td id="p1_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisher['.$i.']"   ></td>';
-    echo '			<td id="p2_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisherid['.$i.']" ></td>';
-    echo '			<td style="vertical-align: top;"><input name="leftbar['.$i.']"     ></td>';
-    echo '			<td style="vertical-align: top;"><input name="rightbar['.$i.']"    ></td>';
-    echo '			<td><select                             name="imagename['.$i.']">';
-    echo '					<option value="">None</option>';
-    echo '					<option value="images/wreath.jpg">Wreath</option>';
-    echo '					<option value="images/santa.jpg">Santa</option>';
-    echo '					<option value="images/jukebox.jpg">Jukebox</option>';
-    echo '					<option value="images/rickynelson.jpg">Ricky Nelson</option>';
-    echo '					<option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
-    echo '			</select></td>';
-    echo '		</tr>';
+    echo '                    <tr>'."\n";
+    echo '                        <td style="vertical-align: top; text-align: right; font-weight: bold;">'.$i.'</td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="titlea['.$i.']"      value="'.$row_titlea.'"></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="titleb['.$i.']"      value="'.$row_titleb.'"></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="artista['.$i.']"     value="'.$row_artista.'"></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="artistb['.$i.']"     value="'.$row_artistb.'"></td>'."\n";
+    echo '                        <td id="p1_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisher['.$i.']"   ></td>'."\n";
+    echo '                        <td id="p2_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisherid['.$i.']" ></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="leftbar['.$i.']"     ></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="rightbar['.$i.']"    ></td>'."\n";
+    echo '                        <td><select                             name="imagename['.$i.']">';
+    echo '<option value="">None</option>';
+    echo '<option value="images/wreath.jpg">Wreath</option>';
+    echo '<option value="images/santa.jpg">Santa</option>';
+    echo '<option value="images/jukebox.jpg">Jukebox</option>';
+    echo '<option value="images/rickynelson.jpg">Ricky Nelson</option>';
+    echo '<option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
+    echo '                        </select></td>'."\n";
+    echo '                    </tr>'."\n";
 
 }
 
