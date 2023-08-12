@@ -138,7 +138,7 @@ if ($debug_output) {
                         <li>Update indec page to use HTML 5 & bootstrap.</li>
                         <li>Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex).</li>
                         <li>Show/hide columns for publisher (A lesser used function to make form cleaner).</li>
-			<li>Added an option to convert all artist and/or track names to upper case.</li>
+                        <li>Added an option to convert all artist and/or track names to upper case.</li>
                         <li>Bug fix: Better handling of double quotes in the form.</li>
                         <li>Bug fix: Stripping spaces from start/finish of artists/titles.</li>
                     </ul>
@@ -516,10 +516,10 @@ for ($i = 1; $i <= 20; $i ++) {
 
     if ($row_already_populated) {
 
-        $row_titlea  = $titlea[$i];
-        $row_artista = $artista[$i];
-        $row_titleb  = $titleb[$i];
-        $row_artistb = $artistb[$i];
+        $row_titlea  = trim(stripslashes($titlea[$i]));
+        $row_artista = trim(stripslashes($artista[$i]));
+        $row_titleb  = trim(stripslashes($titleb[$i]));
+        $row_artistb = trim(stripslashes($artistb[$i]));
 
     } else {
 
@@ -536,11 +536,11 @@ for ($i = 1; $i <= 20; $i ++) {
         }
     }
 
-    //Clean up messy spaces...
-    $row_titlea  = str_replace('"', '&quot;', trim($row_titlea));
-    $row_titleb  = str_replace('"', '&quot;', trim($row_titleb));
-    $row_artista = str_replace('"', '&quot;', trim($row_artista));
-    $row_artistb = str_replace('"', '&quot;', trim($row_artistb));
+    //Clean up HTML display characters...
+    $row_titlea  = htmlentities($row_titlea);
+    $row_titleb  = htmlentities($row_titleb);
+    $row_artista = htmlentities($row_artista);
+    $row_artistb = htmlentities($row_artistb);
 
     echo '		<tr>';
     echo '			<td style="vertical-align: top; text-align: right; font-weight: bold;">'.$i.'</td>';
