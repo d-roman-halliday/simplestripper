@@ -59,7 +59,7 @@ if ($debug_output) {
 <?php
 }
 ?>
-                    <button class="nav-link active" id="nav_ID-C_01" data-bs-toggle="tab" data-bs-target="#nav_C-C_01" type="button" role="tab" aria-controls="#nav_C-C_01" aria-selected="true">
+                    <button class="nav-link"        id="nav_ID-C_01" data-bs-toggle="tab" data-bs-target="#nav_C-C_01" type="button" role="tab" aria-controls="#nav_C-C_01" aria-selected="false">
                         <h3>
                             <span>Example</span>
                         </h3>
@@ -78,7 +78,7 @@ if ($debug_output) {
             </nav>
             <div class="tab-content mt-5" id="nav-tabContent">
 
-                <div class="tab-pane fade show active" id="nav_C-C_01" role="tabpanel" aria-labelledby="nav_ID-C_01">
+                <div class="tab-pane fade show" id="nav_C-C_01" role="tabpanel" aria-labelledby="nav_ID-C_01">
                     <p>
                         Here is a sample of each type of label (TEXT OR IMAGE) you can make
                         using the RED frame and showing the different areas of a label that
@@ -133,12 +133,14 @@ if ($debug_output) {
                     </p>
                     <h3>Key Changes v3</h3>
                     <ul>
-                        <li>New php driven input form (html page archived to html4form.html)</li>
-                        <li>Discogs.com integration (give a url for discogs and fetch data)</li>
-                        <li>Update indec page to use HTML 5 & bootstrap</li>
-                        <li>Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex)</li>
-                        <li>Show/hide columns for publisher (A lesser used function to make form cleaner)</li>
-                        <li>Added an option to convert all artist and/or track names to upper case</li>
+                        <li>New php driven input form (html page archived to html4form.html).</li>
+                        <li>Discogs.com integration (give a url for discogs and fetch data).</li>
+                        <li>Update indec page to use HTML 5 & bootstrap.</li>
+                        <li>Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex).</li>
+                        <li>Show/hide columns for publisher (A lesser used function to make form cleaner).</li>
+                        <li>Added an option to convert all artist and/or track names to upper case.</li>
+                        <li>Bug fix: Better handling of double quotes in the form.</li>
+                        <li>Bug fix: Stripping spaces from start/finish of artists/titles.</li>
                     </ul>
                     <h4>
                         Planned Changes &amp; Suggestions for v3.1 and onwards
@@ -514,10 +516,10 @@ for ($i = 1; $i <= 20; $i ++) {
 
     if ($row_already_populated) {
 
-        $row_titlea  = $titlea[$i];
-        $row_artista = $artista[$i];
-        $row_titleb  = $titleb[$i];
-        $row_artistb = $artistb[$i];
+        $row_titlea  = trim(stripslashes($titlea[$i]));
+        $row_artista = trim(stripslashes($artista[$i]));
+        $row_titleb  = trim(stripslashes($titleb[$i]));
+        $row_artistb = trim(stripslashes($artistb[$i]));
 
     } else {
 
@@ -534,25 +536,31 @@ for ($i = 1; $i <= 20; $i ++) {
         }
     }
 
-    echo '		<tr>';
-    echo '			<td style="vertical-align: top; text-align: right; font-weight: bold;">'.$i.'</td>';
-    echo '			<td style="vertical-align: top;"><input name="titlea['.$i.']"      value="'.$row_titlea.' "></td>';
-    echo '			<td style="vertical-align: top;"><input name="titleb['.$i.']"      value="'.$row_titleb.' "></td>';
-    echo '			<td style="vertical-align: top;"><input name="artista['.$i.']"     value="'.$row_artista.'"></td>';
-    echo '			<td style="vertical-align: top;"><input name="artistb['.$i.']"     value="'.$row_artistb.'"></td>';
-    echo '			<td id="p1_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisher['.$i.']"   ></td>';
-    echo '			<td id="p2_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisherid['.$i.']" ></td>';
-    echo '			<td style="vertical-align: top;"><input name="leftbar['.$i.']"     ></td>';
-    echo '			<td style="vertical-align: top;"><input name="rightbar['.$i.']"    ></td>';
-    echo '			<td><select                             name="imagename['.$i.']">';
-    echo '					<option value="">None</option>';
-    echo '					<option value="images/wreath.jpg">Wreath</option>';
-    echo '					<option value="images/santa.jpg">Santa</option>';
-    echo '					<option value="images/jukebox.jpg">Jukebox</option>';
-    echo '					<option value="images/rickynelson.jpg">Ricky Nelson</option>';
-    echo '					<option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
-    echo '			</select></td>';
-    echo '		</tr>';
+    //Clean up HTML display characters...
+    $row_titlea  = htmlentities($row_titlea);
+    $row_titleb  = htmlentities($row_titleb);
+    $row_artista = htmlentities($row_artista);
+    $row_artistb = htmlentities($row_artistb);
+
+    echo '                    <tr>'."\n";
+    echo '                        <td style="vertical-align: top; text-align: right; font-weight: bold;">'.$i.'</td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="titlea['.$i.']"      value="'.$row_titlea.'"></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="titleb['.$i.']"      value="'.$row_titleb.'"></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="artista['.$i.']"     value="'.$row_artista.'"></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="artistb['.$i.']"     value="'.$row_artistb.'"></td>'."\n";
+    echo '                        <td id="p1_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisher['.$i.']"   ></td>'."\n";
+    echo '                        <td id="p2_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisherid['.$i.']" ></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="leftbar['.$i.']"     ></td>'."\n";
+    echo '                        <td style="vertical-align: top;"><input name="rightbar['.$i.']"    ></td>'."\n";
+    echo '                        <td><select                             name="imagename['.$i.']">';
+    echo '<option value="">None</option>';
+    echo '<option value="images/wreath.jpg">Wreath</option>';
+    echo '<option value="images/santa.jpg">Santa</option>';
+    echo '<option value="images/jukebox.jpg">Jukebox</option>';
+    echo '<option value="images/rickynelson.jpg">Ricky Nelson</option>';
+    echo '<option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
+    echo '                        </select></td>'."\n";
+    echo '                    </tr>'."\n";
 
 }
 

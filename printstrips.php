@@ -356,19 +356,13 @@ switch ($labeltype) {
                 // /Start Print The Artists, Publisher and Publisher ID
                 // ####################################################
                 // combine artist a and b into one string if needed
-                if ($artista[$recordtoprint] && $artistb[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]/$artistb[$recordtoprint]");
-                } elseif ($artista[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]");
-                } elseif ($artistb[$recordtoprint]) {
-                    $combinedartist = ("$artistb[$recordtoprint]");
-                } else {
-                    $combinedartist = ("");
-                }
-                $combinedartist = stripslashes($combinedartist);
+
+                $combinedartist = get_combined_artist($recordtoprint);
+
                 if ($artist_upper_case) {
                     $combinedartist = strtoupper($combinedartist);
                 }
+
                 $pdf->SetXY(44 + $horiz * 288, 54 + $vert * 72);
                 $pdf->CellZ(156, 0, $combinedartist, '', '', 'C');
                 $publisherinfo = "$publisher[$recordtoprint] $publisherid[$recordtoprint]";
@@ -432,9 +426,9 @@ switch ($labeltype) {
                     // #############################################################################
                     $pdf->SetLineWidth(2);
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                    $pdf->Line(16 + $horiz, 22 + $vert * 72, 16 + $horiz, 90 + $vert * 72);   // Print the Left Line col 1
+                    $pdf->Line(16  + $horiz, 22 + $vert * 72, 16  + $horiz, 90 + $vert * 72); // Print the Left Line col 1
                     $pdf->Line(236 + $horiz, 22 + $vert * 72, 236 + $horiz, 90 + $vert * 72); // Print the left line col 2
-                    $pdf->Line(81 + $horiz, 22 + $vert * 72, 81 + $horiz, 90 + $vert * 72);   // Print the right line next to the picture col 1
+                    $pdf->Line(81  + $horiz, 22 + $vert * 72, 81  + $horiz, 90 + $vert * 72); // Print the right line next to the picture col 1
                     $pdf->Line(369 + $horiz, 22 + $vert * 72, 369 + $horiz, 90 + $vert * 72); // Print the right line next to the picture col 2
                     $pdf->Line(303 + $horiz, 22 + $vert * 72, 303 + $horiz, 90 + $vert * 72); // Print the right line col 1
                     $pdf->Line(524 + $horiz, 22 + $vert * 72, 524 + $horiz, 90 + $vert * 72); // Print the right line col 2
@@ -511,19 +505,13 @@ switch ($labeltype) {
                 // /Start Print The Artists, Publisher and Publisher ID
                 // ####################################################
                 // combine artist a and b into one string if needed
-                if ($artista[$recordtoprint] && $artistb[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]/$artistb[$recordtoprint]");
-                } elseif ($artista[$recordtoprint]) {
-                    $combinedartist = ("$artista[$recordtoprint]");
-                } elseif ($artistb[$recordtoprint]) {
-                    $combinedartist = ("$artistb[$recordtoprint]");
-                } else {
-                    $combinedartist = ("");
-                }
-                $combinedartist = stripslashes($combinedartist);
+
+                $combinedartist = get_combined_artist($recordtoprint);
+
                 if ($artist_upper_case) {
                     $combinedartist = strtoupper($combinedartist);
                 }
+
                 $pdf->SetXY(84 + $horiz * 288, 54 + $vert * 72);
                 $pdf->CellZ(148, 0, $combinedartist, '', '', 'C');
                 $publisherinfo = "$publisher[$recordtoprint] $publisherid[$recordtoprint]";
@@ -540,6 +528,33 @@ switch ($labeltype) {
 }
 // we're done. Send it out
 $pdf->Output('titlestrips.pdf', 'I');
+
+function get_combined_artist($array_pos)
+{
+    //To make this properly work across all code, there should be a class titlestrip() and an array of them.
+    $artista = $_POST['artista'];
+    $artistb = $_POST['artistb'];
+
+    $this_artist_a = trim(stripslashes($artista[$array_pos]));
+    $this_artist_b = trim(stripslashes($artistb[$array_pos]));
+
+    if (strlen($this_artist_a) > 0 && strlen($this_artist_b) > 0) {
+        if ($this_artist_a == $this_artist_b) {
+            $combinedartist = $this_artist_a;
+        } else {
+            $combinedartist = "$this_artist_a/$this_artist_b";
+        }
+    } elseif (strlen($this_artist_a) > 0) {
+        $combinedartist = "$this_artist_a";
+    } elseif (strlen($this_artist_b) > 0) {
+        $combinedartist = "$this_artist_b";
+    } else {
+        $combinedartist = "";
+    }
+
+    return stripslashes($combinedartist);
+
+}
 
 function &hex2rgb($hex, $asString = true)
 {
