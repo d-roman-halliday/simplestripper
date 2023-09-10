@@ -5,7 +5,7 @@
  * @version $Id$
  * @copyright 2003
  */
-class ZPDF extends FPDF{
+class SsFpdfExtended extends FPDF{
 
     // Extend standard cell function with one that allows scaling text within the bo (so if the text is too long, it's squished into place)
 

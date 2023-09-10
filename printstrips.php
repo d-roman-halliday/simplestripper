@@ -69,7 +69,7 @@ else {
 $font_style = $fontbold . $fontitalic . $fontunderline;
 //
 // start building pdf
-$pdf = new ZPDF('P', 'pt', 'Letter');
+$pdf = new SsFpdfExtended('P', 'pt', 'Letter'); // Imported from cellz.php containing an extended version of ZPDF
 $pdftitle = 'Jukebox Title Strips';
 $author = 'Simple Stripper Version 1.10 Modified by David Roman-Halliday';
 
