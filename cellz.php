@@ -6,10 +6,29 @@
  * @copyright 2003
  */
 class ZPDF extends FPDF{
+
+    // Extend standard cell function with one that allows scaling text within the bo (so if the text is too long, it's squished into place)
+
+    // It looks like this class was inspired by these examples:
+    // - https://www.fpdf.org/en/script/script32.php
+    // - https://www.fpdf.org/en/script/script62.php
+    // Common calls (from printstrips.php):
+    // - CellZ(148, 0, $titleb[$recordtoprint], '', '', 'C');
+    // - CellZ(60,  0, $publisherinfo,          '', '', 'L');
+
     function CellZ($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = 0, $link = '')
     {
+        //      w = Cell width. If 0, the cell extends up to the right margin. (same as standard cell())
+        //      h = Cell height. Default value: 0. (same as standard cell())
+        //   text = String to print. Default value: empty string. (same as standard cell())
+        // border = <not used always blank>  (same as standard cell())
+        //     ln = <not used always blank>  (same as standard cell())
+        //  align = <text alignment> : L = Left, C = Center
+
         // Output a cell
         $k = $this -> k;
+
+        //If vertical position is over the PageBreakTrigger, add a Page Break
         if($this -> y + $h > $this -> PageBreakTrigger and !$this -> InFooter and $this -> AcceptPageBreak())
         {
             // Automatic page break
@@ -28,8 +47,12 @@ class ZPDF extends FPDF{
                 $this -> _out(sprintf('%.3f Tw', $ws * $k));
             }
         }
+
+        // Set horizontal point within margin if none is give/0 value
         if($w == 0)
             $w = $this -> w - $this -> rMargin - $this -> x;
+
+        // Not used by printstrips.php (border always '')
         $s = '';
         if($fill == 1 or $border == 1)
         {
@@ -39,6 +62,8 @@ class ZPDF extends FPDF{
                 $op = 'S';
             $s = sprintf('%.2f %.2f %.2f %.2f re %s ', $this -> x * $k, ($this -> h - $this -> y) * $k, $w * $k, - $h * $k, $op);
         }
+
+        // Not used by printstrips.php (border always '')
         if(is_string($border))
         {
             $x = $this -> x;
@@ -52,9 +77,11 @@ class ZPDF extends FPDF{
             if(is_int(strpos($border, 'B')))
                 $s .= sprintf('%.2f %.2f m %.2f %.2f l S ', $x * $k, ($this -> h - ($y + $h)) * $k, ($x + $w) * $k, ($this -> h - ($y + $h)) * $k);
         }
-        if($txt != '')
+
+        // Craete text part
+        if(trim($txt) != '')
         {
-            // CellZ: Scale
+            // CellZ: Scale text (if string is too long for box)
             $txt_scale = 100.0;
             $str_width = $this -> GetStringWidth($txt);
             if ($str_width > $w) $txt_scale = $w / $str_width * 100.0;
@@ -70,7 +97,8 @@ class ZPDF extends FPDF{
             if($this -> ColorFlag)
                 $s .= 'q ' . $this -> TextColor . ' ';
             $txt2 = str_replace(')', '\\)', str_replace('(', '\\(', str_replace('\\', '\\\\', $txt)));
-            // CellZ
+
+            // CellZ: Create text string with scaling information to insert into pdf
             $s .= sprintf('BT %.2f %.2f Td %.2f Tz (%s) Tj 100 Tz ET', ($this -> x + $dx) * $k, ($this -> h - ($this -> y + .5 * $h + .3 * $this -> FontSize)) * $k, $txt_scale, $txt2);
             if($this -> underline)
                 $s .= ' ' . $this -> _dounderline($this -> x + $dx, $this -> y + .5 * $h + .3 * $this -> FontSize, $txt);
@@ -79,6 +107,8 @@ class ZPDF extends FPDF{
             if($link)
                 $this -> Link($this -> x + $dx, $this -> y + .5 * $h - .5 * $this -> FontSize, $this -> GetStringWidth($txt), $this -> FontSize, $link);
         }
+
+        // Craete output
         if($s)
             $this -> _out($s);
         $this -> lasth = $h;
