@@ -134,21 +134,37 @@ if ($debug_output) {
                         Originally written by George Howell (2001)?
                     </p>
                     <h3>Key Changes v3</h3>
+                    <h4>
+                        v3.1
+                    </h4>
+                    <ul>
+                        <li>URL input for image (now any image can be used, made to fit by height).</li>
+                        <li>Background Changes:
+                            <ul>
+                                <li>Independant class for titlestrip manipulations and POST interaction (reusable and clean).</li>
+                                <li>Bug fixes: Resolving some bugs coming up in error log (not visible in front end).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <h4>
+                        V3 Core Version
+                    </h4>
                     <ul>
                         <li>New php driven input form (html page archived to html4form.html).</li>
                         <li>Discogs.com integration (give a url for discogs and fetch data).</li>
-                        <li>Update indec page to use HTML 5 &amp; bootstrap.</li>
+                        <li>Update index page to use HTML 5 &amp; bootstrap.</li>
                         <li>Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex).</li>
-                        <li>Show/hide columns for publisher (A lesser used function to make form cleaner).</li>
+                        <li>Show/hide columns for publisher (A lesser used function to make the form cleaner).</li>
                         <li>Added an option to convert all artist and/or track names to upper case.</li>
                         <li>Bug fix: Better handling of double quotes in the form.</li>
                         <li>Bug fix: Stripping spaces from start/finish of artists/titles.</li>
                     </ul>
                     <h4>
-                        Planned Changes &amp; Suggestions for v3.1 and onwards
+                        Planned Changes &amp; Suggestions for the future
                     </h4>
                     <ul>
-                        <li>Import artwork from discogs</li>
+                        <li>Import data using the<a href='https://musicbrainz.org/doc/MusicBrainz_API'>MusicBrainz API</a></li>
+                        <li>Import artwork from discogs/MusicBrainz</li>
                         <li>Make more options global OR label speciffic (such as hit/other markings)</li>
                         <li>More fonts</li>
                         <li>Artist/track speciffic fonts (optional)</li>
@@ -413,7 +429,7 @@ if (isset($discogs_url) and strlen(trim($discogs_url)) > 0) { // we have a reque
         }
         $trackData['releaseArtist'] = $releaseArtistName;
 
-        // If this is a row of information without a trqck position, skip
+        // If this is a row of information without a track position, skip
         if (strlen(trim($trackData['trackPosition'])) == 0) {
             continue;
         }
@@ -435,11 +451,11 @@ if (isset($discogs_url) and strlen(trim($discogs_url)) > 0) { // we have a reque
             $trackData['displayArtist'] = $trackData['releaseArtist'];
         }
 
-        // strip a trining number in brackets (for artists where there are more than one with the same name)
+        // strip a trailing number in brackets (for artists where there are more than one with the same name)
         if (    (strpos($trackData['displayArtist'], '(') !== false) //str_contains() is a PHP8 new function
             and (strpos($trackData['displayArtist'], ')') !== false)
            ) {
-            $trackData['displayArtist'] = preg_replace('/\([0-9]*\)$/i', '', $trackData['displayArtist']);
+            $trackData['displayArtist'] = trim(preg_replace('/\([0-9]*\)$/i', '', $trackData['displayArtist']));
         }
 
         if ($debug_output) {
@@ -452,6 +468,20 @@ if (isset($discogs_url) and strlen(trim($discogs_url)) > 0) { // we have a reque
 }
 
 if ($debug_output) { echo '</p>' . "\n"; }
+
+if ($debug_output) {
+    echo '<h3>Variable Dumps</h3>' . "\n";
+    echo '<h4>Track Array</h4>' . "\n";
+    echo '<pre>' . "\n";
+    var_dump($trackArray);
+    echo '</pre>' . "\n";
+    echo '<h4>Title Strips Manager</h4>' . "\n";
+    echo '<pre>' . "\n";
+    var_dump($ts_manager);
+    echo '</pre>' . "\n";
+
+}
+
 
 ?>
                 </div>
