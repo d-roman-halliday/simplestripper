@@ -101,36 +101,112 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
         $json_data_decoded_data = $json_data_decoded->data;
 
         ////////////////////////////////////////////////////////////////////////////
-        // Get release artist (if set)
+        // Get release data (First release item in array is the one we want, all others are related releases)
+        // - artist (if set)
+        // - year
+        // - label info
         ////////////////////////////////////////////////////////////////////////////
 
         foreach ($json_data_decoded_data as $item) { // foreach element in $arr
-            if ($debug_output) { echo '<p>Release Info' . '</br>' . "\n"; }
-
             $itemType = $item->__typename;
-
             // We are interestd in Release entries
             if ($itemType != 'Release') {
                 continue;
             }
 
-            // var_dump($item);
+            echo '<h4>JSON Data - Release</h4>' . "\n";
+            //echo '<pre>' . "\n";
+            //var_dump($item);
+            //echo '</pre>' . "\n";
+
             $releaseArtistName = $item->primaryArtists[0]->displayName; // always first item in array
+            $releaseYear = $item->released;
+            $releaseCountry = $item->country;
 
-            if ($debug_output) { echo 'Release Artist: ' . $releaseArtistName . '</br>' . "\n"; }
+            // Pick first in array (not sure how to be sure which is best, but in cases where speciffic release has beenpicked this is the correct. In other cases ists apsudo random)
+            $releaseLabelCatalogNumber = $item->labels[0]->catalogNumber;
+            $releaseLabelName = $item->labels[0]->displayName;
 
-            if ($debug_output) { echo '</p>' . "\n"; }
+            ////////////////////////////////////////////////////////////////////
+            // Try and extract release image ID (used to get image from other image items)
+            // This feels like a mess as it's breaking text out of JSON thenformatting it again.
+            // There isprobably a much cleaner way of doing it, but this works (for now)
+            ////////////////////////////////////////////////////////////////////
+            $releaseImageID='';
+            foreach ($item as $sub_item) { // foreach element in $arr
+                if (!isset($sub_item->__typename) or is_null($sub_item->__typename)) {
+                    continue;
+                }
+                $sub_itemType = $sub_item->__typename;
+                if ($sub_itemType != 'ImagesConnection') {
+                    continue;
+                }
 
-            // The first Release item contains the artist we are intereswted in...
+                $releaseImageRefStr = $sub_item->edges[0]->node->__ref;
+                preg_match('/\{(.+)\}/s', $releaseImageRefStr, $releaseImageRefStrJson);
+                $releaseImageRefJson = json_decode($releaseImageRefStrJson[0]);
+
+                $releaseImageID = $releaseImageRefJson->id;
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Show what we got (debug)
+            ////////////////////////////////////////////////////////////////////
+            if ($debug_output) {
+                echo '<h4>Release Info</h4>'.  "\n" . '<p>' . '</br>' . "\n";
+                echo 'Release Artist: ' . $releaseArtistName . '</br>' . "\n";
+                echo 'Release Year: ' . $releaseYear . '</br>' . "\n";
+                echo 'Release Label Name: ' . $releaseLabelName . '</br>' . "\n";
+                echo 'Release Label CatalogNumber: ' . $releaseLabelCatalogNumber . '</br>' . "\n";
+                echo 'Release Image ID: ' . $releaseImageID . '</br>' . "\n";
+                echo '</p>' . "\n";
+            }
+
+            // The first Release item contains the artist and attributes we are interested in...
             // Other releases are related items that aren't important to us
             break;
         }
 
-        ////////////////////////////////////////////////////////////////////////////
-        // Get track details
-        ////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
+        // Try and get cover art
+        ////////////////////////////////////////////////////////////////////////
 
-        if ($debug_output) { echo '<p>' . "\n"; }
+        foreach ($json_data_decoded_data as $item) { // foreach element in $arr
+            $itemType = $item->__typename;
+            // We are interestd in Image entries
+            if ($itemType != 'Image') {
+                continue;
+            }
+
+            // Filter for the image we got the ID from the Release
+            $itemImageID = $item->id;
+            if ($itemImageID != $releaseImageID) {
+                continue;
+            }
+
+            // Dirty parsing of JSON as part of it is stored as string which then needs to be reconverted to json
+            $itemImageFullsizeRefStr = $item->fullsize->__ref;
+            preg_match('/\{(.+)\}/s', $itemImageFullsizeRefStr, $itemImageFullsizeRefStrJson);
+            $itemImageFullsizeRefJson = json_decode($itemImageFullsizeRefStrJson[0]);
+
+            $releaseImageRef = $itemImageFullsizeRefJson->sourceUrl;
+
+            ////////////////////////////////////////////////////////////////////
+            // Show what we got (debug)
+            ////////////////////////////////////////////////////////////////////
+            if ($debug_output) {
+                echo '<h4>Release Artwork</h4>'.  "\n" . '<p>' . '</br>' . "\n";
+                echo 'Release Image URL: ' . $releaseImageRef . '</br>' . "\n";
+                echo '</p>' . "\n";
+            }
+
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Get track details
+        ////////////////////////////////////////////////////////////////////////
+
+        if ($debug_output) { echo '<h4>Track Info</h4>'.  "\n" . '<p>' . '</br>' . "\n"; }
 
         foreach ($json_data_decoded_data as $item) { // foreach element in $arr
 
@@ -141,11 +217,14 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
                 continue;
             }
 
-            // var_dump($item);
+            //echo '<h4>JSON Data - Track</h4>' . "\n";
+            //echo '<pre>' . "\n";
+            //var_dump($item);
+            //echo '</pre>' . "\n";
+
             $trackData['trackName'] = $item->title;
             $trackData['trackPosition'] = $item->position;
 
-            //(!is_null($trackArray) && is_array($trackArray) && isset($trackArray[0]))
             $trackData['trackArtist'] = '';
             if (   !is_null($item->primaryArtists)
                 && is_array($item->primaryArtists)
@@ -153,6 +232,11 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
                 $trackData['trackArtist'] = $item->primaryArtists[0]->displayName; // always first item in array (if exists)
             }
             $trackData['releaseArtist'] = $releaseArtistName;
+            $trackData['releaseYear'] = $releaseArtistName;
+            $trackData['releaseCountry'] = $releaseCountry;
+            $trackData['releaseLabelCatalogNumber'] = $releaseLabelCatalogNumber;
+            $trackData['releaseLabelName'] = $releaseLabelName;
+            $trackData['releaseArtworkURL'] = $releaseImageRef; //Note : This seems to get blocked on the server by cloudflair (preventing external scraping/hosting)
 
             // If this is a row of information without a track position, skip
             if (strlen(trim($trackData['trackPosition'])) == 0) {
@@ -167,7 +251,7 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
                 $trackData['displayArtist'] = $trackData['releaseArtist'];
             }
 
-            // If ther prefference didn't work, try whateever has a value
+            // If the prefference didn't work, try whateever has a value
             if (strlen(trim($trackData['displayArtist'])) == 0) {
                 $trackData['displayArtist'] = $trackData['trackArtist'];
             }
@@ -194,11 +278,16 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
 
     if ($debug_output) { echo '</p>' . "\n"; }
 
-    if ($debug_output) {
+    $dump_variables = False; // Extra switch for debugging control
+    if ($debug_output and $dump_variables) {
         echo '<h3>Variable Dumps (external_site_parser_discogs)</h3>' . "\n";
         echo '<h4>Track Array</h4>' . "\n";
         echo '<pre>' . "\n";
         var_dump($trackArray);
+        echo '</pre>' . "\n";
+        echo '<h4>JSON Data</h4>' . "\n";
+        echo '<pre>' . "\n";
+        var_dump($json_data_decoded_data);
         echo '</pre>' . "\n";
     }
 

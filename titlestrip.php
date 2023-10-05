@@ -74,7 +74,7 @@ class titlestrip {
 
     function is_valid_image_file_type($image_filename_to_check) {
         $result = False;
-        $valid_file_types = ['jpg','png','gif'];
+        $valid_file_types = ['jpg','jpeg','png','gif'];
         $image_file_type = pathinfo($image_filename_to_check, PATHINFO_EXTENSION); // to get extension
 
         if (in_array($image_file_type, $valid_file_types)) {

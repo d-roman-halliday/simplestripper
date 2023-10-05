@@ -3,7 +3,7 @@
 // Setup & Config of page (main processing is set to happen in "debug output" area)
 ////////////////////////////////////////////////////////////////////////////////
 //Debugging Flag (so I can hide the ugly when not testing)
-$debug_output = true;
+$debug_output = false;
 
 require "titlestrip.php";
 require "external_site_parser.php";
@@ -139,11 +139,17 @@ if ($debug_output) {
                         v3.1
                     </h4>
                     <ul>
-                        <li>URL input for image (now any image can be used, made to fit by height).</li>
+                        <li>URL input for image (now any image can be used, made to fit by height).
+                            <ul>
+                                <li><b>Note:</b>Many images fail to load/insert because FPDF doesnn't support them (even if they are a jpg or png)</li>
+                            </ul>
+                        </li>
                         <li>Background Changes:
                             <ul>
                                 <li>Independant class for titlestrip manipulations and POST interaction (reusable and clean).</li>
                                 <li>Bug fixes: Resolving some bugs coming up in error log (not visible in front end).</li>
+                                <li>Discogs integration now also retrives: Release year, Publisher info, Album art URL</li>
+                                <li><b>Note:</b>RAlbumart URL fails when requested from server (protectiuon against remte image hosting and parsing their images). Big dissapointment.</li>
                             </ul>
                         </li>
                     </ul>
@@ -165,7 +171,7 @@ if ($debug_output) {
                     </h4>
                     <ul>
                         <li>Import data using the<a href='https://musicbrainz.org/doc/MusicBrainz_API'>MusicBrainz API</a></li>
-                        <li>Import artwork from discogs/MusicBrainz</li>
+                        <li>Import artwork from discogs/MusicBrainz. Note: Discogs prevents the remote interaction.</li>
                         <li>Make more options global OR label speciffic (such as hit/other markings)</li>
                         <li>More fonts</li>
                         <li>Artist/track speciffic fonts (optional)</li>
@@ -210,22 +216,9 @@ if ($debug_output) {
                     ////////////////////////////////////////////////////////////////////////////
                     $ts_manager = new titlestrip_manager;
 
-                    foreach($ts_manager->titlestrips as $titlestrip)
-                    {
-                        $combined_artist = $titlestrip->get_combined_artist();
-                        echo "titlestrip_artist: $titlestrip->track_a / - $combined_artist<br>\n";
-                    }
-
                     ////////////////////////////////////////////////////////////
                     // Request data from External URL (discogs)
                     ////////////////////////////////////////////////////////////
-
-                    //Initialise array (for any fetched data)
-                    $trackArray = array();
-
-                    //Default values (preference for track/release artist)
-                    $t_checked = 'checked="checked"';
-                    $r_checked = '';
 
                     //Get data from form (if submitted)
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -233,10 +226,17 @@ if ($debug_output) {
                         $discogs_artist_pref = trim(stripslashes($_POST['discogs_artist_pref']));
                     }
 
+                    //Initialise array (for any fetched data)
+                    $trackArray = array();
+
                     //Get array of data from URL
                     if (isset($discogs_url) and strlen(trim($discogs_url)) > 0) { // we have a request to work with
                         $trackArray = external_site_parser_discogs($discogs_url,$discogs_artist_pref,$debug_output);
                     }
+
+                    //Default values (preference for track/release artist)
+                    $t_checked = 'checked="checked"';
+                    $r_checked = '';
 
                     //Change settings for dislay of form (preference for track/release artist)
                     if (isset($discogs_artist_pref) and $discogs_artist_pref == "R") {
@@ -245,7 +245,7 @@ if ($debug_output) {
                     }
 
                     ////////////////////////////////////////////////////////////
-                    // Request data from External URL (discogs)
+                    // Dump Variables
                     ////////////////////////////////////////////////////////////
 
                     if ($debug_output) {
@@ -395,7 +395,10 @@ for ($i = 1; $i <= 20; $i ++) {
     $row_image = '';
 
     $row_already_populated = False;
-    if (isset($ts_manager)){
+    if (   isset($ts_manager)
+        && is_array($ts_manager->titlestrips)
+        && isset($ts_manager->titlestrips[$i])
+       ){
         $row_already_populated = $ts_manager->titlestrips[$i]->has_set_values();
     }
 
