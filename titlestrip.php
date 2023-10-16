@@ -169,6 +169,7 @@ class titlestrip {
 
 class titlestrip_manager {
 
+    // Array Variables (used internaly to allocate to titlestrips array)
     protected $post_array_title_a;
     protected $post_array_title_b;
     protected $post_array_artist_a;
@@ -179,6 +180,29 @@ class titlestrip_manager {
     protected $post_array_publisher_id;
     protected $post_array_image_reference;
 
+    // Non Array Variables
+    public $titlesize;
+    public $titlefont;
+    public $framecolor;
+    public $background;
+    public $backgroundcolor;
+    public $artistbackgroundcolor;
+
+    public $fontcolor;
+    public $fontbold;
+    public $fontitalic;
+    public $fontunderline;
+    public $artistbgr;
+    public $leftbar;
+    public $rightbar;
+    public $labeltype;
+    public $prelabel;
+    public $artistBoxStyle;
+
+    public $artist_upper_case = false;
+    public $track_upper_case = false;
+
+    // Array for title strips
     public $titlestrips = array();
 
     function __construct(){
@@ -189,6 +213,7 @@ class titlestrip_manager {
     }
 
     protected function populate_post_variables(){
+        // Array Variables
         $this->post_array_title_a = $_POST['titlea'];
         $this->post_array_title_b = $_POST['titleb'];
         $this->post_array_artist_a = $_POST['artista'];
@@ -198,6 +223,45 @@ class titlestrip_manager {
         $this->post_array_publisher = $_POST['publisher'];
         $this->post_array_publisher_id = $_POST['publisherid'];
         $this->post_array_image_reference = $_POST['imagename'];
+
+        // Non Array Variables
+        $this->titlesize = $_POST['titlesize'];
+        $this->titlefont = $_POST['titlefont'];
+        $this->framecolor = $_POST['framecolor'];
+        $this->background = $_POST['background'];
+        $this->backgroundcolor = $_POST['backgroundcolor'];
+        $this->artistbackgroundcolor = $_POST['artistbackgroundcolor'];
+
+        // Fonts
+        $this->fontcolor = $_POST['fontcolor'];
+
+        $this->fontbold = $_POST['fontbold'];
+        $this->fontitalic = $_POST['fontitalic'];
+        $this->fontunderline = $_POST['fontunderline'];
+
+        $this->font_style = $this->fontbold . $this->fontitalic . $this->fontunderline;
+
+
+        $this->artistbgr = $_POST['artbackground'];
+        $this->leftbar = $_POST['leftbar'];
+        $this->rightbar = $_POST['rightbar'];
+        $this->labeltype = $_POST['labeltype'];
+        $this->prelabel = $_POST['prelabel'];
+
+        $this->artistBoxStyle = trim(stripslashes($_POST['artistBoxStyle']));
+        #Set default
+        if ($this->artistBoxStyle == "") {
+            $this->artistBoxStyle = 'arrows';
+        }
+
+        if(isset($_POST['artist_upper']) && $_POST['artist_upper'] == 'artist_upper_case') {
+            $this->artist_upper_case = true;
+        }
+
+        if(isset($_POST['track_upper']) && $_POST['track_upper'] == 'track_upper_case') {
+            $this->track_upper_case = true;
+        }
+
     }
 
     function populate_titlestrips(){

@@ -27,44 +27,6 @@ $smallfontsize = "9";
 // Get variables from POST and populate titlestrip objects
 $ts_manager = new titlestrip_manager;
 
-// Non array values
-$titlesize = $_POST['titlesize'];
-$titlefont = $_POST['titlefont'];
-$framecolor = $_POST['framecolor'];
-$background = $_POST['background'];
-$backgroundcolor = $_POST['backgroundcolor'];
-$artistbackgroundcolor = $_POST['artistbackgroundcolor'];
-$titlefont = $_POST['titlefont'];
-$fontcolor = $_POST['fontcolor'];
-$fontbold = $_POST['fontbold'];
-$fontitalic = $_POST['fontitalic'];
-$fontunderline = $_POST['fontunderline'];
-$artistbgr = $_POST['artbackground'];
-$leftbar = $_POST['leftbar'];
-$rightbar = $_POST['rightbar'];
-$labeltype = $_POST['labeltype'];
-$prelabel = $_POST['prelabel'];
-$artistBoxStyle = $_POST['artistBoxStyle'];
-
-if ($artistBoxStyle == "") {
-    $artistBoxStyle = 'arrows';
-}
-
-if(isset($_POST['artist_upper']) && $_POST['artist_upper'] == 'artist_upper_case') {
-    $artist_upper_case = true;
-}
-else {
-    $artist_upper_case = false;
-}
-
-if(isset($_POST['track_upper']) && $_POST['track_upper'] == 'track_upper_case') {
-    $track_upper_case = true;
-}
-else {
-    $track_upper_case = false;
-}
-
-$font_style = $fontbold . $fontitalic . $fontunderline;
 //
 // start building pdf
 $pdf = new SsFpdfExtended('P', 'pt', 'Letter'); // Imported from cellz.php containing an extended version of FPDF
@@ -77,7 +39,7 @@ $pdf->SetLeftMargin(18);
 $pdf->SetTopMargin(18);
 $pdf->AddPage();
 
-switch ($titlesize) {
+switch ($ts_manager->titlesize) {
     case "small":
         $fontsize = $smallfontsize;
         break;
@@ -92,7 +54,7 @@ switch ($titlesize) {
 // #################################################
 // START SET The LINE color Routine
 // #################################################
-$a = hex2rgb($framecolor);
+$a = hex2rgb($ts_manager->framecolor);
 $stripr = $a[0];
 $stripg = $a[1];
 $stripb = $a[2];
@@ -100,7 +62,7 @@ $stripb = $a[2];
 // #########################################
 // Start set the background COLOR ROUTINE
 // #########################################
-$a = hex2rgb($backgroundcolor);
+$a = hex2rgb($ts_manager->backgroundcolor);
 $stripbgr = $a[0];
 $stripbgg = $a[1];
 $stripbgb = $a[2];
@@ -108,15 +70,23 @@ $stripbgb = $a[2];
 // #########################################
 // Start set the artist background COLOR ROUTINE
 // #########################################
-$a = hex2rgb($artistbackgroundcolor);
+$a = hex2rgb($ts_manager->artistbackgroundcolor);
 $artiststripbgr = $a[0];
 $artiststripbgg = $a[1];
 $artiststripbgb = $a[2];
 
+// #########################################
+// Start set the font COLOR ROUTINE
+// #########################################
+$a = hex2rgb($ts_manager->fontcolor);
+$fontcolorr = $a[0];
+$fontcolorg = $a[1];
+$fontcolorb = $a[2];
+
 // ################################################
 // START Paint the frame Background if selected Routine
 // ################################################
-if ($background) {
+if ($ts_manager->background) {
     $pdf->SetLineWidth(6);
     $pdf->SetDrawColor($stripbgr, $stripbgg, $stripbgb);
     $pdf->SetFillColor($stripbgr, $stripbgg, $stripbgb);
@@ -130,7 +100,7 @@ if ($background) {
 // End Paint the Background Routine
 // #########################################
 
-switch ($labeltype) {
+switch ($ts_manager->labeltype) {
     case "text":
 
         // #########################################
@@ -139,8 +109,8 @@ switch ($labeltype) {
         for ($horiz = 0; $horiz <= 1; $horiz ++) {
             // and do it zero to nine times for ten rows
             for ($vert = 0; $vert <= 9; $vert ++) {
-                $pdf->SetFont($titlefont, $font_style, $fontsize);
-                if ($prelabel == "") {
+                $pdf->SetFont($ts_manager->titlefont, $ts_manager->font_style, $fontsize);
+                if ($ts_manager->prelabel == "") {
                     // ###########################################################
                     // START Print the top and bottom lines of the labels Routine
                     // ###########################################################
@@ -151,7 +121,6 @@ switch ($labeltype) {
                         $pdf->Line(18 + $horiz * 288, 22 + $vert * 72, 234 + $horiz * 288, 22 + $vert * 72);
                     }
                     $pdf->Line(18 + $horiz * 288, 90 + $vert * 72, 234 + $horiz * 288, 90 + $vert * 72);
-
                     // #########################################
                     // End Top and Bottom Line Routine
                     // #########################################
@@ -177,7 +146,7 @@ switch ($labeltype) {
                     $ab_draw_box = True;
                     $ab_draw_hex = False;
 
-                    switch ($artistBoxStyle) {
+                    switch ($ts_manager->artistBoxStyle) {
                         case "arrows":
                             $ab_draw_arrows = True;
                             $ab_draw_box = True;
@@ -199,15 +168,14 @@ switch ($labeltype) {
                     $pdf->SetLineWidth(1);
 
                     if ($ab_draw_box) {
-                        if ($artistbgr) {
+                        if ($ts_manager->artistbgr) {
                             $pdf->SetFillColor($artiststripbgr, $artiststripbgg, $artiststripbgb);
-                            $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                            $pdf->Rect(39 + $horiz * 288, 45 + $vert * 72, 168, 18, 'DF');
                         } else {
                             $pdf->SetFillColor(255, 255, 255);//blank fill
-                            $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                            $pdf->Rect(39 + $horiz * 288, 45 + $vert * 72, 168, 18, 'DF');
                         }
+                        $pdf->SetDrawColor($stripr, $stripg, $stripb);
+                        $pdf->Rect(39 + $horiz * 288, 45 + $vert * 72, 168, 18, 'DF');
+
 
                         // ##############################################
                         // START PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
@@ -325,12 +293,12 @@ switch ($labeltype) {
                 $combinedartist = $ts_manager->titlestrips[$recordtoprint]->get_combined_artist();
                 $publisherinfo = $ts_manager->titlestrips[$recordtoprint]->get_combined_publisherinfo();
 
-                if ($track_upper_case) {
+                if ($ts_manager->track_upper_case) {
                     $track_a = strtoupper($track_a);
                     $track_b = strtoupper($track_b);
                 }
 
-                if ($artist_upper_case) {
+                if ($ts_manager->artist_upper_case) {
                     $combinedartist = strtoupper($combinedartist);
                 }
 
@@ -338,10 +306,6 @@ switch ($labeltype) {
                 // START Change Font Color Routine
                 // #########################################
 
-                $a = hex2rgb($fontcolor);
-                $fontcolorr = $a[0];
-                $fontcolorg = $a[1];
-                $fontcolorb = $a[2];
                 $pdf->SetTextColor($fontcolorr, $fontcolorg, $fontcolorb);
 
                 // #########################################
@@ -411,8 +375,8 @@ switch ($labeltype) {
         for ($horiz = 0; $horiz <= 1; $horiz ++) {
             // and do it nine times for ten rows
             for ($vert = 0; $vert <= 9; $vert ++) {
-                $pdf->SetFont($titlefont, $font_style, $fontsize);
-                if ($prelabel == "") {
+                $pdf->SetFont($ts_manager->titlefont, $font_style, $fontsize);
+                if ($ts_manager->prelabel == "") {
                     // ###########################################################
                     // START Print the top and bottom lines of the labels Routine
                     // ###########################################################
@@ -447,16 +411,14 @@ switch ($labeltype) {
                     // START Make the Box for the Artist Routine
                     // #########################################
                     $pdf->SetLineWidth(1);
-                    if ($artistbgr) {
+                    if ($ts_manager->artistbgr) {
                         $pdf->SetFillColor($artiststripbgr, $artiststripbgg, $artiststripbgb);
-                        $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                        $pdf->Rect(82 + $horiz * 288, 45 + $vert * 72, 154, 18, 'DF');
-                        $pdf->SetDrawColor($stripr, $stripg, $stripb);
                     } else {
-                        $pdf->SetFillColor(255, 255, 255);
-                        $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                        $pdf->Rect(82 + $horiz * 288, 45 + $vert * 72, 154, 18, 'DF');
+                        $pdf->SetFillColor(255, 255, 255); // whiite/blank
                     }
+                    $pdf->SetDrawColor($stripr, $stripg, $stripb);
+                    $pdf->Rect(82 + $horiz * 288, 45 + $vert * 72, 154, 18, 'DF');
+
                     // #########################################
                     // End Make Box for Artist Routine
                     // #########################################
@@ -478,23 +440,18 @@ switch ($labeltype) {
                 $combinedartist = $ts_manager->titlestrips[$recordtoprint]->get_combined_artist();
                 $publisherinfo = $ts_manager->titlestrips[$recordtoprint]->get_combined_publisherinfo();
 
-                if ($track_upper_case) {
+                if ($ts_manager->track_upper_case) {
                     $track_a = strtoupper($track_a);
                     $track_b = strtoupper($track_b);
                 }
 
-                if ($artist_upper_case) {
+                if ($ts_manager->artist_upper_case) {
                     $combinedartist = strtoupper($combinedartist);
                 }
 
                 // #########################################
                 // START Change Font Color Routine
                 // #########################################
-
-                $a = hex2rgb($fontcolor);
-                $fontcolorr = $a[0];
-                $fontcolorg = $a[1];
-                $fontcolorb = $a[2];
                 $pdf->SetTextColor($fontcolorr, $fontcolorg, $fontcolorb);
 
                 // #########################################
