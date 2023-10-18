@@ -8,11 +8,19 @@ See the attached license file(s) for GNU GPL license.
 
 ## V3 Changes
 
+### V3.1
+
+1. Made more columns with show/hide buttons.
+2. Extended the discogs integration to get more items including publisher information (Tried to import album art, but they have block the external image links). 
+3. Technical reworking to split out code into classes, e.g. the submitted form data (reusable in form and strip creation).
+4. Lots of behind the scenes technical changes and tweaks (these should make future enhancements easier).
+5. Some little UI tweaks.
+
 ### V3.0.0
 
 1. New php driven input form (html page archived to html4form.html)
 2. Discogs.com integration (give a url for discogs and fetch data)
-3. Update indec page to use HTML 5 & bootstrap
+3. Update index page to use HTML 5 & bootstrap
 4. Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex)
 5. Show/hide columns for publisher (A lesser used function to make form cleaner)
 6. Added an option to convert all artist and/or track names to upper case
@@ -24,7 +32,6 @@ See the attached license file(s) for GNU GPL license.
 * Add/enhance fonts, try:
   * http://www.fpdf.org/en/tutorial/tuto7.htm
    * https://www.dafont.com/metal-lord.font
-* Import artwork from discogs
 * Make more options global OR label speciffic (such as hit/other markings)
 * Artist/track speciffic fonts (optional)
 * Image based backgrund for labels rather than drawing them (more options)
@@ -32,6 +39,7 @@ See the attached license file(s) for GNU GPL license.
   * More dynamic sizing
   * Ink saving (don't print empty boxes)
   * Combined image/text only labels
+* Import/export the form/label data as CSV
 
 ## V2 Changes (Stephen Rice)
 
@@ -87,4 +95,5 @@ Some other implementations, and hosting of version 2.4 and below:
 * Stephen Rice: http://www.n4yza.com/jukebox/jukebox_labels/index.html
 * GraphicStripper v 0.0.2: http://www.pinballrebel.com/archive/other/onlinenew/index.html
 * SimpleStripper v 0.0.2: http://www.pinballrebel.com/archive/other/onlinestrips/index.html
-* https://www.mikesarcade.com/arcade/titlestrips.html
+* Mikes Arcade: https://www.mikesarcade.com/arcade/titlestrips.html
+* Isolated Desert Compound (an awesome javascript form implementation, with templates for using a laser cutter): https://www.isolateddesertcompound.com/stripper/
