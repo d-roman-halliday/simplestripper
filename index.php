@@ -267,37 +267,81 @@ if ($debug_output) {
         <div class="container pt-5">
         <h2>Main Form</h2>
             <p>
-                Because the Publisher information isn't a common thing for people to use, I've hidden it from the form. 
-                You can show and hide the coluns using the buttons below, the visibility of the columns doesn't impact
-                anything in them or if it's sent to the label generator.
+                Because the Publisher information isn't a common thing for people to use, I've hidden it from the form (although it's still there).
+                You can show and hide columns using the buttons below, the visibility of the columns doesn't impact
+                the values in them, or if they are sent to the label generator (everything is sent).
             </p>
             <div id="toolbar">
-                <button type="button" id="button1" class="btn btn-secondary" onclick="changeVisOn()">Show Publisher Columns</button>
-                <button type="button" id="button2" class="btn btn-secondary" onclick="changeVisOff()">Hide Publisher Columns</button>
+                <button type="button" id="button1_sh_rn" class="btn btn-secondary" onclick="changeVisOffSelected('rn')">Hide Row Number</button>
+
+                <!-- <button type="button" id="button1_sh_ta" class="btn btn-secondary" onclick="changeVisOffSelected('ta')">Hide Title A Column</button> -->
+                <!-- <button type="button" id="button1_sh_tb" class="btn btn-secondary" onclick="changeVisOffSelected('tb')">Hide Title B Column</button> -->
+
+                <!-- <button type="button" id="button1_sh_aa" class="btn btn-secondary" onclick="changeVisOffSelected('aa')">Hide Artist A Column</button> -->
+                <!-- <button type="button" id="button1_sh_ab" class="btn btn-secondary" onclick="changeVisOffSelected('ab')">Hide Artist B Column</button> -->
+
+                <button type="button" id="button1_sh_pb" class="btn btn-secondary" onclick="changeVisOnPublishers()">Show Publisher Columns</button>
+
+                <button type="button" id="button1_sh_lb" class="btn btn-secondary" onclick="changeVisOffSelected('lb')">Hide Left Bar Column</button>
+                <button type="button" id="button1_sh_rb" class="btn btn-secondary" onclick="changeVisOffSelected('rb')">Hide Right Bar Column</button>
+
+                <button type="button" id="button1_sh_im" class="btn btn-secondary" onclick="changeVisOffSelected('im')">Hide Image Column</button>
+                <button type="button" id="button1_sh_ib" class="btn btn-secondary" onclick="changeVisOffSelected('ib')">Hide Image Toggle Column</button>
             </div>
             <script>
-                function changeVisOn() {
-                    // What to do
-                    document.getElementById('p1_tr_00').style.display = 'table-cell';
-                    document.getElementById('p2_tr_00').style.display = 'table-cell';
-<?php
-                    for ($i = 1; $i <= 20; $i ++) {
-                        echo '                    document.getElementById("p1_tr_'.$i.'").style.display = "table-cell";'."\n";
-                        echo '                    document.getElementById("p2_tr_'.$i.'").style.display = "table-cell";'."\n";
+                function changeVisOffSelected(column_ref) {
+                    for (var i = 0; i <= 20; i++) {
+                        column_element = document.getElementById(column_ref + '_tr_' + i);
+                        if (column_element) {
+                            column_element.style.display = 'none';
                         }
-?>
-
-                }
-                function changeVisOff() {
-                    // What to do
-                    document.getElementById('p1_tr_00').style.display = 'none';
-                    document.getElementById('p2_tr_00').style.display = 'none';
-<?php
-                    for ($i = 1; $i <= 20; $i ++) {
-                        echo '                    document.getElementById("p1_tr_'.$i.'").style.display = "none";'."\n";
-                        echo '                    document.getElementById("p2_tr_'.$i.'").style.display = "none";'."\n";
                     }
-?>
+                    control_button_1_element = document.getElementById('button1_sh_' + column_ref);
+                    if (control_button_1_element) {
+                        old_text = control_button_1_element.textContent;
+                        new_text = old_text.replace("Hide", "Show");
+                        control_button_1_element.textContent = new_text;
+                        control_button_1_element.style.backgroundColor="green";
+                        control_button_1_element.setAttribute('onclick','changeVisOnSelected(\'' + column_ref + '\')');
+                    }
+                }
+                function changeVisOnSelected(column_ref) {
+                    for (var i = 0; i <= 20; i++) {
+                        column_element = document.getElementById(column_ref + '_tr_' + i);
+                        if (column_element) {
+                            column_element.style.display = 'table-cell';
+                        }
+                    }
+                    control_button_1_element = document.getElementById('button1_sh_' + column_ref);
+                    if (control_button_1_element) {
+                        old_text = control_button_1_element.textContent;
+                        new_text = old_text.replace("Show", "Hide");
+                        control_button_1_element.textContent = new_text;
+                        control_button_1_element.style.backgroundColor="blue";
+                        control_button_1_element.setAttribute('onclick','changeVisOffSelected(\'' + column_ref + '\')');
+                    }
+                }
+                function changeVisOnPublishers() {
+                    changeVisOnSelected('p1');
+                    changeVisOnSelected('p2');
+
+                    control_button_1_element = document.getElementById('button1_sh_pb');
+                    if (control_button_1_element) {
+                        control_button_1_element.textContent = control_button_1_element.textContent.replace("Show", "Hide");
+                        control_button_1_element.style.backgroundColor="blue";
+                        control_button_1_element.setAttribute('onclick','changeVisOffPublishers()');
+                    }
+                }
+                function changeVisOffPublishers() {
+                    changeVisOffSelected('p1');
+                    changeVisOffSelected('p2');
+
+                    control_button_1_element = document.getElementById('button1_sh_pb');
+                    if (control_button_1_element) {
+                        control_button_1_element.textContent = control_button_1_element.textContent.replace("Hide", "Show");
+                        control_button_1_element.style.backgroundColor="green";
+                        control_button_1_element.setAttribute('onclick','changeVisOnPublishers()');
+                    }
                 }
                 // Control image selection type
                 function img_switch_fn(element_id) {
@@ -368,17 +412,17 @@ if ($debug_output) {
                    >
                 <tbody>
                     <tr>
-                        <td style="vertical-align: top;"><br></td>
-                        <td style="vertical-align: top; font-weight: bold;">Title A</td>
-                        <td style="vertical-align: top; font-weight: bold;">Title B</td>
-                        <td style="vertical-align: top; font-weight: bold;">Artist A</td>
-                        <td style="vertical-align: top; font-weight: bold;">Artist B</td>
-                        <td id="p1_tr_00" style="vertical-align: top; font-weight: bold; display:none">Publisher</td>
-                        <td id="p2_tr_00" style="vertical-align: top; font-weight: bold; display:none">Publisher ID</td>
-                        <td style="vertical-align: top; font-weight: bold;">Left Bar</td>
-                        <td style="vertical-align: top; font-weight: bold;">Right Bar</td>
-                        <td style="vertical-align: top; font-weight: bold;">Image/Image URL</td>
-                        <td style="vertical-align: top; font-weight: bold;">Image/URL Toggle</td>
+                        <td id="rn_tr_0" style="vertical-align: top;"><br></td>
+                        <td id="ta_tr_0" style="vertical-align: top; font-weight: bold;">Title A</td>
+                        <td id="tb_tr_0" style="vertical-align: top; font-weight: bold;">Title B</td>
+                        <td id="aa_tr_0" style="vertical-align: top; font-weight: bold;">Artist A</td>
+                        <td id="ab_tr_0" style="vertical-align: top; font-weight: bold;">Artist B</td>
+                        <td id="p1_tr_0" style="vertical-align: top; font-weight: bold; display:none">Publisher</td>
+                        <td id="p2_tr_0" style="vertical-align: top; font-weight: bold; display:none">Publisher ID</td>
+                        <td id="lb_tr_0" style="vertical-align: top; font-weight: bold;">Left Bar</td>
+                        <td id="rb_tr_0" style="vertical-align: top; font-weight: bold;">Right Bar</td>
+                        <td id="im_tr_0" style="vertical-align: top; font-weight: bold;">Image/Image URL</td>
+                        <td id="ib_tr_0" style="vertical-align: top; font-weight: bold;">Image/URL Toggle</td>
                     </tr>
 <?php
 
@@ -447,16 +491,16 @@ for ($i = 1; $i <= 20; $i ++) {
     //$row_image = htmlentities($row_image); // Not needed
 
     echo '                    <tr>'."\n";
-    echo '                        <td text-align: right; font-weight: bold;">'.$i.'</td>'."\n";
-    echo '                        <td>                                       <input name="titlea['.$i.']"      value="'.$row_track_a.'"></td>'."\n";
-    echo '                        <td>                                       <input name="titleb['.$i.']"      value="'.$row_track_b.'"></td>'."\n";
-    echo '                        <td>                                       <input name="artista['.$i.']"     value="'.$row_artist_a.'"></td>'."\n";
-    echo '                        <td>                                       <input name="artistb['.$i.']"     value="'.$row_artist_b.'"></td>'."\n";
+    echo '                        <td id="rn_tr_'.$i.'" text-align: right; font-weight: bold;">'.$i.'</td>'."\n";
+    echo '                        <td id="ta_tr_'.$i.'">                     <input name="titlea['.$i.']"      value="'.$row_track_a.'"></td>'."\n";
+    echo '                        <td id="tb_tr_'.$i.'">                     <input name="titleb['.$i.']"      value="'.$row_track_b.'"></td>'."\n";
+    echo '                        <td id="aa_tr_'.$i.'">                     <input name="artista['.$i.']"     value="'.$row_artist_a.'"></td>'."\n";
+    echo '                        <td id="ab_tr_'.$i.'">                     <input name="artistb['.$i.']"     value="'.$row_artist_b.'"></td>'."\n";
     echo '                        <td id="p1_tr_'.$i.'" style="display:none"><input name="publisher['.$i.']"   value="'.$row_publisher.'"></td>'."\n";
     echo '                        <td id="p2_tr_'.$i.'" style="display:none"><input name="publisherid['.$i.']" value="'.$row_publisher_id.'"></td>'."\n";
-    echo '                        <td>                                       <input name="leftbar['.$i.']"     value="'.$row_left_bar.'"></td>'."\n";
-    echo '                        <td>                                       <input name="rightbar['.$i.']"    value="'.$row_right_bar.'"></td>'."\n";
-    echo '                        <td><select id="img_in_'.$i.'"                    name="imagename['.$i.']">';
+    echo '                        <td id="lb_tr_'.$i.'">                     <input name="leftbar['.$i.']"     value="'.$row_left_bar.'"></td>'."\n";
+    echo '                        <td id="rb_tr_'.$i.'">                     <input name="rightbar['.$i.']"    value="'.$row_right_bar.'"></td>'."\n";
+    echo '                        <td id="im_tr_'.$i.'"><select id="img_in_'.$i.'"  name="imagename['.$i.']">';
     echo '<option value="">None</option>';
     echo '<option value="images/wreath.jpg">Wreath</option>';
     echo '<option value="images/santa.jpg">Santa</option>';
@@ -465,7 +509,7 @@ for ($i = 1; $i <= 20; $i ++) {
     echo '<option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
     echo '</select>'."\n";
     echo '                        </td>'."\n";
-    echo '                        <td><button type="button" id="img_switch_bt_'.$i.'" class="btn btn-secondary" onclick="img_switch_fn('.$i.')">Change</button></td>'."\n";
+    echo '                        <td id="ib_tr_'.$i.'"><button type="button" id="img_switch_bt_'.$i.'" class="btn btn-secondary" onclick="img_switch_fn('.$i.')">Change</button></td>'."\n";
     echo '                    </tr>'."\n";
 
 }
