@@ -10,9 +10,11 @@ See the attached license file(s) for GNU GPL license.
 
 ### V3.1.0
 
+This was pushed for release faster than expected, as the regular site scraping of discogs had broken (they addedt a javascriopt check which curl couldn't work with). Now that the API is configured, future changes on it should be easier.
+
 1. Made more columns with show/hide buttons.
 2. Changed the iscogs inteagration to use proper API
-3. Extended the discogs integration to get more items including release year information (Tried to import album art, but they have block the external image links. Tried to get publisher informatio but old scrapingmethod broke). 
+3. Extended the discogs integration to get more items including release year information (Tried to import album art, but they have block the external image links. Tried to get publisher informatio but old scrapingmethod broke).
 4. Technical reworking to split out code into classes, e.g. the submitted form data (reusable in form and strip creation).
 5. Lots of behind the scenes technical changes and tweaks (these should make future enhancements easier).
 6. Some little UI tweaks.
