@@ -5,6 +5,9 @@
 //Debugging Flag (so I can hide the ugly when not testing)
 $debug_output = false;
 
+require "titlestrip.php";
+require "external_site_parser.php";
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -115,7 +118,7 @@ if ($debug_output) {
                     <ul>
                         <li>Individual single: https://www.discogs.com/master/96610-Snow-Informer</li>
                         <li>Box set (one release artist, varying artist names for tracks): https://www.discogs.com/master/1141135-Jimi-Hendrix-Classic-Singles-Collection</li>
-                        <li>Box set (one artist): https://www.discogs.com/release/501595-The-Who-The-First-Singles-Box</li>	    
+                        <li>Box set (one artist): https://www.discogs.com/release/501595-The-Who-The-First-Singles-Box</li>
                     </ul>
                 </div>
 
@@ -127,56 +130,13 @@ if ($debug_output) {
                         Key Release history
                     </h2>
                     <p>
-                        SimpleStripper v 3 (2023) Tweaked by David Roman-Halliday<br />
+                        SimpleStripper v 3 (2023) Remodeled by David Roman-Halliday<br />
                         Modified from v 2 (02/27/2020) Extensively Modified by Stephen Rice.<br />
                         Originally written by George Howell (2001)?
                     </p>
-                    <h3>Key Changes v3</h3>
-                    <ul>
-                        <li>New php driven input form (html page archived to html4form.html).</li>
-                        <li>Discogs.com integration (give a url for discogs and fetch data).</li>
-                        <li>Update indec page to use HTML 5 & bootstrap.</li>
-                        <li>Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex).</li>
-                        <li>Show/hide columns for publisher (A lesser used function to make form cleaner).</li>
-                        <li>Added an option to convert all artist and/or track names to upper case.</li>
-                        <li>Bug fix: Better handling of double quotes in the form.</li>
-                        <li>Bug fix: Stripping spaces from start/finish of artists/titles.</li>
-                    </ul>
-                    <h4>
-                        Planned Changes &amp; Suggestions for v3.1 and onwards
-                    </h4>
-                    <ul>
-                        <li>Import artwork from discogs</li>
-                        <li>Make more options global OR label speciffic (such as hit/other markings)</li>
-                        <li>More fonts</li>
-                        <li>Artist/track speciffic fonts (optional)</li>
-                        <li>Image based backgrund for labels rather than drawing them (more options)</li>
-                        <li>Rework drawing to allow for:
-                            <ul>
-                                <li>More dynamic sizing</li>
-                                <li>Ink saving (don't print empty boxes)</li>
-                                <li>combined image/text only labels</li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <h3>Key Changes v2</h3>
+                    <h2>Getting The Code &amp; Release Information</h2>
                     <p>
-                        Made by Stephen Rice
-                    </p>
-                    <ul>
-                        <li>You now can print a page without any lines on it in case you prefer to use pre printed labels.</li>
-                        <li>Updates have been done to remain compliant with the newer php server software.</li>
-                        <li>Included a updated FPDF version 1.82 software that handles printing in the zip file.</li>
-                        <li>You now have color pickers available so that you can change colors of different parts of the label. You should click on the color and pick a color and when done either click off the color or click r tab key. This allows you to have many more choices for the colors would like to print.</li>
-                        <li>The labels will now open in a new window so that all the information you have entered is still available if you want to make changes.</li>
-                    </ul>
-                    <h2>Older versions</h2>
-                    <p>
-                        By George Howell. At this time, all mirrors of original seem to be down... Fortunately Steve published the updated code (as linked above) so that open source idea of the software could continue.
-                    </p>
-                    <h2>Getting The Code</h2>
-                    <p>
-                        The code is available on github: <a href="https://github.com/d-roman-halliday/simplestripper">https://github.com/d-roman-halliday/simplestripper</a>
+                        The code, and release information (details of cahnges) are available on github: <a href="https://github.com/d-roman-halliday/simplestripper">https://github.com/d-roman-halliday/simplestripper</a>
                     </p>
                 </div>
 
@@ -186,247 +146,86 @@ if ($debug_output) {
                     </p>
 <?php
 
-////////////////////////////////////////////////////////////////////////////////
-// Main Processing
-////////////////////////////////////////////////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////////////
+                    // Parse any existing titlestrip information
+                    ////////////////////////////////////////////////////////////////////////////
+                    $ts_manager = new titlestrip_manager;
 
-/*
-**************************************************************************
-*/
-// POST data (discogs)
-/*
-**************************************************************************
-*/
+                    ////////////////////////////////////////////////////////////////////////////
+                    // Parse any existing form information (for external site parsing)
+                    ////////////////////////////////////////////////////////////////////////////
+                    $ex_manager = new external_site_manager;
 
-//Discogs data
-$discogs_url = trim($_POST['discogs_url']);
-$discogs_artist_pref = $_POST['discogs_artist_pref'];
+                    ////////////////////////////////////////////////////////////
+                    // Form default values management
+                    ////////////////////////////////////////////////////////////
 
-if ($debug_output and strlen(trim($discogs_url)) > 0) {
-    echo "<h3>Discogs Data</h3>";
-    echo "<p>\n";
-    echo 'discogs_url: <a href="'.$discogs_url.'">'.$discogs_url.'</a><br>'."\n";
-    echo "discogs_artist_pref: $discogs_artist_pref <br>\n";
-    echo "</p>\n";
+                    // External Site Configuration
+                    $external_site_release_artist_preference_checked_t = 'checked="checked"';
+                    $external_site_release_artist_preference_checked_r = '';
+                    if (isset($discogs_artist_pref) and $discogs_artist_pref == "R") {
+                        $external_site_release_artist_preference_checked_t = '';
+                        $external_site_release_artist_preference_checked_r = 'checked="checked"';
+                    }
 
-}
+                    $external_site_year_preference_checked_n = '';
+                    if ($ex_manager->external_site_year_preference === 'N') {$external_site_year_preference_checked_n  = 'checked="checked"';}
+                    $external_site_year_preference_checked_l = '';
+                    if ($ex_manager->external_site_year_preference === 'L') {$external_site_year_preference_checked_l  = 'checked="checked"';}
+                    $external_site_year_preference_checked_r = '';
+                    if ($ex_manager->external_site_year_preference === 'R') {$external_site_year_preference_checked_r  = 'checked="checked"';}
 
-if ($discogs_artist_pref == "T") {
-    $t_checked = 'checked="checked"';
-    $r_checked = '';
-} else {
-    $t_checked = '';
-    $r_checked = 'checked="checked"';
-}
+                    $external_site_LabelName_include_checked = ''; // Not in basic API
+                    //if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
 
-/*
-**************************************************************************
-*/
-// POST data (main form)
-/*
-**************************************************************************
-*/
-// Need to manage these in common with printstrps.php and include all for form refresh
-$titlea = $_POST['titlea'];
-$titleb = $_POST['titleb'];
-$artista = $_POST['artista'];
-$artistb = $_POST['artistb'];
+                    $external_site_CatalogNumber_include_checked = ''; // Not in basic API
+                    //if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
 
-/*
-**************************************************************************
-*/
-// Stolen from https://www.exeideas.com/2020/07/parse-webpage-to-extract-content-using-php.html
-// Give URL to fetch (needs to come from form)
-/*
-**************************************************************************
-*/
+                    // Title Strip Configuration
+                    $artist_upper_id_checked = '';
+                    if ($ts_manager->artist_upper_case) {$artist_upper_id_checked = 'checked="checked"';}
 
-$webPageURL = $discogs_url;
-
-/*
-**************************************************************************
-*/
-// Garb The WebPage Content
-/*
-**************************************************************************
-*/
-
-$ch = curl_init();
-$timeout = 5; // 5 is seconds
-$userAgent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)';
-curl_setopt($ch, CURLOPT_URL, $webPageURL);
-curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-curl_setopt($ch, CURLOPT_HEADER, 1);
-$webPageContent = curl_exec($ch);
-curl_close($ch);
-
-/*
-**************************************************************************
-*/
-// Parse The HTML Content
-/*
-**************************************************************************
-*/
-// Instantiate The DOMDocument Class
-$htmlDom = new DOMDocument();
-$htmlDom->validateOnParse = true;
-
-// Parse the HTML of the page using DOMDocument::loadHTML In UTF8 Encoding
-// @$htmlDom->loadHTML($webPageContent);
-@$htmlDom->loadHTML(mb_convert_encoding($webPageContent, 'HTML-ENTITIES', 'UTF-8'));
-
-/*
-**************************************************************************
-*/
-// Extract json encoded data from page (as discogs pages are built using javascript and manipulating the json data)
-/*
-**************************************************************************
-*/
-
-// There is json data under : <script id="dsdata" type="application/json">
-$scripts = $htmlDom->getElementsByTagName('script');
-
-// Loop through the DOMNodeList.
-// We can do this because the DOMNodeList object is traversable.
-foreach ($scripts as $script) {
-
-    // Get details from entity
-    $scriptText = $script->nodeValue;
-    $scriptType = $script->getAttribute('type');
-    $scriptID   = $script->getAttribute('id');
-
-    // If the script type is empty, skip it and don't use
-    if (strlen(trim($scriptType)) == 0) {
-        continue;
-    }
-
-    // If the script id is empty, skip it and don't use
-    if (strlen(trim($scriptID)) == 0) {
-        continue;
-    }
-
-    // We only want the json data
-    if ($scriptType != 'application/json') {
-        continue;
-    }
-
-    // For the script ID dsdata
-    if ($scriptID != 'dsdata') {
-        continue;
-    }
-
-    $json_data = $scriptText;
-
-    // Once we have found the script we want, we can stop looking at scripts (there will only be one instance of it)
-    break;
-}
-
-/*
-**************************************************************************
-*/
-// Parse json data to extract what we want from it
-/*
-**************************************************************************
-*/
-
-$json_data_decoded = json_decode($json_data);
-
-// We only care about the data part, the config can be ignored
-$json_data_decoded_data = $json_data_decoded->data;
-
-/*
-**************************************************************************
-*/
-// Get release artist (if set)
-/*
-**************************************************************************
-*/
+                    $track_upper_id_checked = '';
+                    if ($ts_manager->track_upper_case) {$track_upper_id_checked  = 'checked="checked"';}
 
 
-foreach ($json_data_decoded_data as $item) { // foreach element in $arr
-    if ($debug_output) { echo '<p>Release Info' . '</br>' . "\n"; }
+                    ////////////////////////////////////////////////////////////
+                    // Request data from External URL (discogs)
+                    ////////////////////////////////////////////////////////////
+                    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                        $discogs_url = $ex_manager->external_site_url;
+                        $discogs_artist_pref = $ex_manager->external_site_release_artist_preference;
+                    }
 
-    $itemType = $item->__typename;
+                    //Initialise array (for any fetched data)
+                    $trackArray = array();
 
-    // We are interestd in Release entries
-    if ($itemType != 'Release') {
-        continue;
-    }
+                    //Get array of data from URL
+                    if (isset($discogs_url) and strlen(trim($discogs_url)) > 0) { // we have a request to work with
+                        // New: Using API from discogs
+                        $api_client = new discogs_api_client;
+                        $trackArray = $api_client->get_track_data_from_url($discogs_url,$discogs_artist_pref,$debug_output);
+                    }
 
-    // var_dump($item);
-    $releaseArtistName = $item->primaryArtists[0]->displayName; // always first item in array
+                    ////////////////////////////////////////////////////////////
+                    // Dump Variables
+                    ////////////////////////////////////////////////////////////
 
-    if ($debug_output) { echo 'Release Artist: ' . $releaseArtistName . '</br>' . "\n"; }
-
-    if ($debug_output) { echo '</p>' . "\n"; }
-
-    // The first Release item contains the artist we are intereswted in...
-    // Other releases are related items that aren't important to us
-    break;
-}
-
-/*
-**************************************************************************
-*/
-// Get track details
-/*
-**************************************************************************
-*/
-
-//initialise array
-$trackArray = array();
-
-if ($debug_output) { echo '<p>' . "\n"; }
-
-foreach ($json_data_decoded_data as $item) { // foreach element in $arr
-
-    $itemType = $item->__typename;
-
-    // We are interestd in these
-    if ($itemType != 'Track') {
-        continue;
-    }
-
-    // var_dump($item);
-    $trackData['trackName'] = $item->title;
-    $trackData['trackPosition'] = $item->position;
-    $trackData['trackArtist'] = $item->primaryArtists[0]->displayName; // always first item in array
-    $trackData['releaseArtist'] = $releaseArtistName;
-
-    // If this is a row of information without a trqck position, skip
-    if (strlen(trim($trackData['trackPosition'])) == 0) {
-        continue;
-    }
-
-    if ($discogs_artist_pref == "T") {
-        $trackData['displayArtist'] = $trackData['trackArtist'];
-    }
-
-    if ($discogs_artist_pref == "R") {
-        $trackData['displayArtist'] = $trackData['releaseArtist'];
-    }
-
-    // If ther prefference didn't work, try whateever has a value
-    if (strlen(trim($trackData['displayArtist'])) == 0) {
-        $trackData['displayArtist'] = $trackData['trackArtist'];
-    }
-
-    if (strlen(trim($trackData['displayArtist'])) == 0) {
-        $trackData['displayArtist'] = $trackData['releaseArtist'];
-    }
-
-    if ($debug_output) {
-        echo 'Track: ' . $trackData['trackPosition'] . ' = ' . $trackData['trackName'] . ' by '. $trackData['displayArtist'] .'(' . $trackData['trackArtist'] . ' | ' . $trackData['releaseArtist'] . ')</br>' . "\n";
-    }
-
-    $trackArray[] = $trackData;
-
-}
-
-if ($debug_output) { echo '</p>' . "\n"; }
-
+                    if ($debug_output) {
+                        echo '<h3>Variable Dumps (main)</h3>' . "\n";
+                        echo '<h4>Track Array</h4>' . "\n";
+                        echo '<pre>' . "\n";
+                        var_dump($trackArray);
+                        echo '</pre>' . "\n";
+                        echo '<h4>External Site Manager</h4>' . "\n";
+                        echo '<pre>' . "\n";
+                        var_dump($ex_manager);
+                        echo '</pre>' . "\n";
+                        echo '<h4>Title Strips Manager</h4>' . "\n";
+                        echo '<pre>' . "\n";
+                        var_dump($ts_manager);
+                        echo '</pre>' . "\n";
+                    }
 ?>
                 </div>
             </div>
@@ -435,46 +234,171 @@ if ($debug_output) { echo '</p>' . "\n"; }
         <div class="container pt-5">
         <h2>Main Form</h2>
             <p>
-                Because the Publisher information isn't a common thing for people to use, I've hidden it from the form. 
-                You can show and hide the coluns using the buttons below, the visibility of the columns doesn't impact
-                anything in them or if it's sent to the label generator.
+                Because the Publisher information isn't a common thing for people to use, I've hidden it from the form (although it's still there).
+                You can show and hide columns using the buttons below, the visibility of the columns doesn't impact
+                the values in them, or if they are sent to the label generator (everything is sent).
             </p>
             <div id="toolbar">
-                <button id="button1" class="btn btn-secondary" onclick="changeVisOn()">Show Publisher Columns</button>
-                <button id="button2" class="btn btn-secondary" onclick="changeVisOff()">Hide Publisher Columns</button>
+                <button type="button" id="button1_sh_rn" class="btn btn-secondary" onclick="changeVisOffSelected('rn')">Hide Row Number</button>
+
+                <!-- <button type="button" id="button1_sh_ta" class="btn btn-secondary" onclick="changeVisOffSelected('ta')">Hide Title A Column</button> -->
+                <!-- <button type="button" id="button1_sh_tb" class="btn btn-secondary" onclick="changeVisOffSelected('tb')">Hide Title B Column</button> -->
+
+                <!-- <button type="button" id="button1_sh_aa" class="btn btn-secondary" onclick="changeVisOffSelected('aa')">Hide Artist A Column</button> -->
+                <!-- <button type="button" id="button1_sh_ab" class="btn btn-secondary" onclick="changeVisOffSelected('ab')">Hide Artist B Column</button> -->
+
+                <button type="button" id="button1_sh_pb" class="btn btn-secondary" onclick="changeVisOnPublishers()">Show Publisher Columns</button>
+
+                <button type="button" id="button1_sh_lb" class="btn btn-secondary" onclick="changeVisOffSelected('lb')">Hide Left Bar Column</button>
+                <button type="button" id="button1_sh_rb" class="btn btn-secondary" onclick="changeVisOffSelected('rb')">Hide Right Bar Column</button>
+
+                <button type="button" id="button1_sh_im" class="btn btn-secondary" onclick="changeVisOffSelected('im')">Hide Image Column</button>
+                <button type="button" id="button1_sh_ib" class="btn btn-secondary" onclick="changeVisOffSelected('ib')">Hide Image Toggle Column</button>
             </div>
             <script>
-                function changeVisOn() {
-                    // What to do
-                    document.getElementById('p1_tr_00').style.display = 'table-cell';
-                    document.getElementById('p2_tr_00').style.display = 'table-cell';
-<?php
-                    for ($i = 1; $i <= 20; $i ++) {
-                        echo '                    document.getElementById("p1_tr_'.$i.'").style.display = "table-cell";'."\n";
-                        echo '                    document.getElementById("p2_tr_'.$i.'").style.display = "table-cell";'."\n";
+                function changeVisOffSelected(column_ref) {
+                    for (var i = 0; i <= 20; i++) {
+                        column_element = document.getElementById(column_ref + '_tr_' + i);
+                        if (column_element) {
+                            column_element.style.display = 'none';
                         }
-?>
-
-                }
-                function changeVisOff() {
-                    // What to do
-                    document.getElementById('p1_tr_00').style.display = 'none';
-                    document.getElementById('p2_tr_00').style.display = 'none';
-<?php
-                    for ($i = 1; $i <= 20; $i ++) {
-                        echo '                    document.getElementById("p1_tr_'.$i.'").style.display = "none";'."\n";
-                        echo '                    document.getElementById("p2_tr_'.$i.'").style.display = "none";'."\n";
                     }
-?>
+                    control_button_1_element = document.getElementById('button1_sh_' + column_ref);
+                    if (control_button_1_element) {
+                        old_text = control_button_1_element.textContent;
+                        new_text = old_text.replace("Hide", "Show");
+                        control_button_1_element.textContent = new_text;
+                        control_button_1_element.style.backgroundColor="green";
+                        control_button_1_element.setAttribute('onclick','changeVisOnSelected(\'' + column_ref + '\')');
+                    }
+                }
+                function changeVisOnSelected(column_ref) {
+                    for (var i = 0; i <= 20; i++) {
+                        column_element = document.getElementById(column_ref + '_tr_' + i);
+                        if (column_element) {
+                            column_element.style.display = 'table-cell';
+                        }
+                    }
+                    control_button_1_element = document.getElementById('button1_sh_' + column_ref);
+                    if (control_button_1_element) {
+                        old_text = control_button_1_element.textContent;
+                        new_text = old_text.replace("Show", "Hide");
+                        control_button_1_element.textContent = new_text;
+                        control_button_1_element.style.backgroundColor="blue";
+                        control_button_1_element.setAttribute('onclick','changeVisOffSelected(\'' + column_ref + '\')');
+                    }
+                }
+                function changeVisOnPublishers() {
+                    changeVisOnSelected('p1');
+                    changeVisOnSelected('p2');
+
+                    control_button_1_element = document.getElementById('button1_sh_pb');
+                    if (control_button_1_element) {
+                        control_button_1_element.textContent = control_button_1_element.textContent.replace("Show", "Hide");
+                        control_button_1_element.style.backgroundColor="blue";
+                        control_button_1_element.setAttribute('onclick','changeVisOffPublishers()');
+                    }
+                }
+                function changeVisOffPublishers() {
+                    changeVisOffSelected('p1');
+                    changeVisOffSelected('p2');
+
+                    control_button_1_element = document.getElementById('button1_sh_pb');
+                    if (control_button_1_element) {
+                        control_button_1_element.textContent = control_button_1_element.textContent.replace("Hide", "Show");
+                        control_button_1_element.style.backgroundColor="green";
+                        control_button_1_element.setAttribute('onclick','changeVisOnPublishers()');
+                    }
+                }
+                // Control image selection type
+                function img_switch_fn(element_id) {
+                    element_ref = 'img_in_'+element_id;
+                    this_element = document.getElementById(element_ref);
+                    this_element_name = this_element.name;
+                    this_element_value = this_element.value;
+                    if (this_element.type == "select-one") {
+                        new_e = document.createElement("input");
+                        new_e.id = element_ref;
+                        new_e.name = this_element_name;
+                        new_e.value = this_element_value;
+                        this_element.replaceWith(new_e);
+                    } else if (this_element.type == "text") {
+                        new_e = document.createElement("select");
+
+                        //Options (there must be a better way of doing this)
+                        option1 = document.createElement("option");
+                        option1.text = "None";
+                        option1.value = '';
+                        new_e.add(option1);
+
+                        option2 = document.createElement("option");
+                        option2.text = "Wreath";
+                        option2.value = 'images/wreath.jpg';
+                        new_e.add(option2);
+
+                        option3 = document.createElement("option");
+                        option3.text = "Santa";
+                        option3.value = 'images/santa.jpg';
+                        new_e.add(option3);
+
+                        option4 = document.createElement("option");
+                        option4.text = "Jukebox";
+                        option4.value = 'images/jukebox.jpg';
+                        new_e.add(option4);
+
+                        option5 = document.createElement("option");
+                        option5.text = "Ricky Nelson";
+                        option5.value = 'images/rickynelson.jpg';
+                        new_e.add(option5);
+
+                        option6 = document.createElement("option");
+                        option6.text = "Beach Boys Picture 1";
+                        option6.value = 'images/beachboys1.jpg';
+                        new_e.add(option6);
+
+                        new_e.id = element_ref;
+                        new_e.name = this_element_name;
+                        new_e.value = this_element_value;
+                        this_element.replaceWith(new_e);
+                    }
                 }
             </script>
         <form method="post" name="record_entry">
             <h3>Discogs</h3>
-            <p>Get data from discogs and append to strip information. This will append to the rows below, note for now only artist and track names will be loaded and refreshed.</p>
+            <p>Get data from discogs and append to strip information. This will append to the rows below. For now only artist and track names (and release year if selected) will be loaded and refreshed.</p>
             <p>
-                <input type="text"  name="discogs_url" id="discogs_url" ><br>
-                <input type="radio" name="discogs_artist_pref" value="R" <?php echo $r_checked; ?>>Prefer Release Artist<br>
-                <input type="radio" name="discogs_artist_pref" value="T" <?php echo $t_checked; ?>>Prefer Track Artist<br>
+                <label for="external_site_url_id">Discogs URL:</label>
+                <input type="text"  id="external_site_url_id" name="external_site_url" id="external_site_url_id" ><br>
+            </p>
+            <h4>
+                External Site Configurations
+            </h4>
+            <p>
+                <label for="external_site_release_artist_preference_id_r">Prefer Release Artist</label>
+                <input type="radio" id="external_site_release_artist_preference_id_r" name="external_site_release_artist_preference" value="R" <?php echo $external_site_release_artist_preference_checked_r; ?>><br>
+                <label for="external_site_release_artist_preference_id_t">Prefer Track Artist</label>
+                <input type="radio" id="external_site_release_artist_preference_id_t" name="external_site_release_artist_preference" value="T" <?php echo $external_site_release_artist_preference_checked_t; ?>><br>
+            </p>
+            <p>
+                <label for="external_site_year_preference_id_n">Don't include Release Year</label>
+                <input type="radio" id="external_site_year_preference_id_n" name="external_site_year_preference" value="N" <?php echo $external_site_year_preference_checked_n; ?>><br>
+                <label for="external_site_year_preference_id_l">Release Year in Left Bar</label>
+                <input type="radio" id="external_site_year_preference_id_l" name="external_site_year_preference" value="L" <?php echo $external_site_year_preference_checked_l; ?>><br>
+                <label for="external_site_year_preference_id_r">Release Year in Right Bar</label>
+                <input type="radio" id="external_site_year_preference_id_r" name="external_site_year_preference" value="R" <?php echo $external_site_year_preference_checked_r; ?>><br>
+
+            </p>
+            <p>
+                <!-- Not available in basic API -->
+<!--
+                <label for="external_site_LabelName_include_id">Include Label Name</label>
+                <input type="checkbox" id="external_site_LabelName_include_id"     name="external_site_LabelName_include"     value="external_site_LabelName_include_t"     <?php echo $external_site_LabelName_include_checked; ?>>
+                <br>
+                <label for="external_site_CatalogNumber_include_id">Include Catalog Number</label>
+                <input type="checkbox" id="external_site_CatalogNumber_include_id" name="external_site_CatalogNumber_include" value="external_site_CatalogNumber_include_t" <?php echo $external_site_CatalogNumber_include_checked; ?>>
+-->
+            </p>
+            <p>
                 <input type="submit" value="Submit">
             </p>
             <h3>Strip Details</h3>
@@ -484,82 +408,113 @@ if ($debug_output) { echo '</p>' . "\n"; }
                    >
                 <tbody>
                     <tr>
-                        <td style="vertical-align: top;"><br></td>
-                        <td style="vertical-align: top; font-weight: bold;">Title A</td>
-                        <td style="vertical-align: top; font-weight: bold;">Title B</td>
-                        <td style="vertical-align: top; font-weight: bold;">Artist A</td>
-                        <td style="vertical-align: top; font-weight: bold;">Artist B</td>
-                        <td id="p1_tr_00" style="vertical-align: top; font-weight: bold; display:none">Publisher</td>
-                        <td id="p2_tr_00" style="vertical-align: top; font-weight: bold; display:none">Publisher ID</td>
-                        <td style="vertical-align: top; font-weight: bold;">Left Bar</td>
-                        <td style="vertical-align: top; font-weight: bold;">Right Bar</td>
-                        <td style="vertical-align: top; font-weight: bold;">Image</td>
+                        <td id="rn_tr_0" style="vertical-align: top;"><br></td>
+                        <td id="ta_tr_0" style="vertical-align: top; font-weight: bold;">Title A</td>
+                        <td id="tb_tr_0" style="vertical-align: top; font-weight: bold;">Title B</td>
+                        <td id="aa_tr_0" style="vertical-align: top; font-weight: bold;">Artist A</td>
+                        <td id="ab_tr_0" style="vertical-align: top; font-weight: bold;">Artist B</td>
+                        <td id="p1_tr_0" style="vertical-align: top; font-weight: bold; display:none">Publisher</td>
+                        <td id="p2_tr_0" style="vertical-align: top; font-weight: bold; display:none">Publisher ID</td>
+                        <td id="lb_tr_0" style="vertical-align: top; font-weight: bold;">Left Bar</td>
+                        <td id="rb_tr_0" style="vertical-align: top; font-weight: bold;">Right Bar</td>
+                        <td id="im_tr_0" style="vertical-align: top; font-weight: bold;">Image/Image URL</td>
+                        <td id="ib_tr_0" style="vertical-align: top; font-weight: bold;">Image/URL Toggle</td>
                     </tr>
 <?php
 
 for ($i = 1; $i <= 20; $i ++) {
 
-    $row_already_populated = False;
+    $row_track_a = '';
+    $row_track_b =  '';
+    $row_artist_a = '';
+    $row_artist_b = '';
+    $row_left_bar = '';
+    $row_right_bar = '';
+    $row_publisher = '';
+    $row_publisher_id = '';
+    $row_image = '';
 
-    if (strlen(trim($titlea[$i])) > 0) {
-        $row_already_populated = True;
-    }
-    if (strlen(trim($titleb[$i])) > 0) {
-        $row_already_populated = True;
-    }
-    if (strlen(trim($artista[$i])) > 0) {
-        $row_already_populated = True;
-    }
-    if (strlen(trim($artistb[$i])) > 0) {
-        $row_already_populated = True;
+    $row_already_populated = False;
+    if (   isset($ts_manager)
+        && is_array($ts_manager->titlestrips)
+        && isset($ts_manager->titlestrips[$i])
+       ){
+        $row_already_populated = $ts_manager->titlestrips[$i]->has_set_values();
     }
 
     if ($row_already_populated) {
 
-        $row_titlea  = trim(stripslashes($titlea[$i]));
-        $row_artista = trim(stripslashes($artista[$i]));
-        $row_titleb  = trim(stripslashes($titleb[$i]));
-        $row_artistb = trim(stripslashes($artistb[$i]));
+        $row_track_a = $ts_manager->titlestrips[$i]->track_a;
+        $row_track_b = $ts_manager->titlestrips[$i]->track_b;
+        $row_artist_a = $ts_manager->titlestrips[$i]->artist_a;
+        $row_artist_b = $ts_manager->titlestrips[$i]->artist_b;
+        $row_left_bar = $ts_manager->titlestrips[$i]->left_bar;
+        $row_right_bar = $ts_manager->titlestrips[$i]->right_bar;
+        $row_publisher = $ts_manager->titlestrips[$i]->publisher;
+        $row_publisher_id = $ts_manager->titlestrips[$i]->publisher_id;
+        $row_image = $ts_manager->titlestrips[$i]->image_reference;
 
     } else {
 
-        $trackData = array_shift($trackArray);
-        $row_titlea  = $trackData['trackName'];
-        $row_artista = $trackData['displayArtist'];
+        // Artist/Trak A (and all other data from the release)
+        if (!is_null($trackArray) && is_array($trackArray) && isset($trackArray[0])) {
+            $trackData = array_shift($trackArray);
+            $row_track_a  = $trackData['trackName'];
+            $row_artist_a = $trackData['displayArtist'];
 
-        $trackData = array_shift($trackArray);
-        $row_titleb  = $trackData['trackName'];
-        $row_artistb = $trackData['displayArtist'];
-
-        if ($row_artistb == $row_artista) {
-            $row_artistb = '';
+            // Release Year
+            if(!is_null($trackData['releaseYear'])) {
+                if ($ex_manager->external_site_year_preference === 'L') { $row_left_bar = $trackData['releaseYear']; }
+                if ($ex_manager->external_site_year_preference === 'R') { $row_right_bar = $trackData['releaseYear']; }
+            }
         }
+
+        // Artist/Trak B
+        if (!is_null($trackArray) && is_array($trackArray) && isset($trackArray[0])) {
+            $trackData = array_shift($trackArray);
+            $row_track_b  = $trackData['trackName'];
+            $row_artist_b = $trackData['displayArtist'];
+        }
+
+        //Protection for artist twice
+        if ($row_artist_a == $row_artist_b) {
+            $row_artist_b = '';
+        }
+
     }
 
     //Clean up HTML display characters...
-    $row_titlea  = htmlentities($row_titlea);
-    $row_titleb  = htmlentities($row_titleb);
-    $row_artista = htmlentities($row_artista);
-    $row_artistb = htmlentities($row_artistb);
+    $row_track_a  = htmlentities($row_track_a);
+    $row_track_b  = htmlentities($row_track_b);
+    $row_artist_a = htmlentities($row_artist_a);
+    $row_artist_b = htmlentities($row_artist_b);
+    $row_left_bar = htmlentities($row_left_bar);
+    $row_right_bar = htmlentities($row_right_bar);
+    $row_publisher = htmlentities($row_publisher);
+    $row_publisher_id = htmlentities($row_publisher_id);
+
+    //$row_image = htmlentities($row_image); // Not needed
 
     echo '                    <tr>'."\n";
-    echo '                        <td style="vertical-align: top; text-align: right; font-weight: bold;">'.$i.'</td>'."\n";
-    echo '                        <td style="vertical-align: top;"><input name="titlea['.$i.']"      value="'.$row_titlea.'"></td>'."\n";
-    echo '                        <td style="vertical-align: top;"><input name="titleb['.$i.']"      value="'.$row_titleb.'"></td>'."\n";
-    echo '                        <td style="vertical-align: top;"><input name="artista['.$i.']"     value="'.$row_artista.'"></td>'."\n";
-    echo '                        <td style="vertical-align: top;"><input name="artistb['.$i.']"     value="'.$row_artistb.'"></td>'."\n";
-    echo '                        <td id="p1_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisher['.$i.']"   ></td>'."\n";
-    echo '                        <td id="p2_tr_'.$i.'" style="vertical-align: top; display:none"><input name="publisherid['.$i.']" ></td>'."\n";
-    echo '                        <td style="vertical-align: top;"><input name="leftbar['.$i.']"     ></td>'."\n";
-    echo '                        <td style="vertical-align: top;"><input name="rightbar['.$i.']"    ></td>'."\n";
-    echo '                        <td><select                             name="imagename['.$i.']">';
+    echo '                        <td id="rn_tr_'.$i.'" text-align: right; font-weight: bold;">'.$i.'</td>'."\n";
+    echo '                        <td id="ta_tr_'.$i.'">                     <input name="titlea['.$i.']"      value="'.$row_track_a.'"></td>'."\n";
+    echo '                        <td id="tb_tr_'.$i.'">                     <input name="titleb['.$i.']"      value="'.$row_track_b.'"></td>'."\n";
+    echo '                        <td id="aa_tr_'.$i.'">                     <input name="artista['.$i.']"     value="'.$row_artist_a.'"></td>'."\n";
+    echo '                        <td id="ab_tr_'.$i.'">                     <input name="artistb['.$i.']"     value="'.$row_artist_b.'"></td>'."\n";
+    echo '                        <td id="p1_tr_'.$i.'" style="display:none"><input name="publisher['.$i.']"   value="'.$row_publisher.'"></td>'."\n";
+    echo '                        <td id="p2_tr_'.$i.'" style="display:none"><input name="publisherid['.$i.']" value="'.$row_publisher_id.'"></td>'."\n";
+    echo '                        <td id="lb_tr_'.$i.'">                     <input name="leftbar['.$i.']"     value="'.$row_left_bar.'"></td>'."\n";
+    echo '                        <td id="rb_tr_'.$i.'">                     <input name="rightbar['.$i.']"    value="'.$row_right_bar.'"></td>'."\n";
+    echo '                        <td id="im_tr_'.$i.'"><select id="img_in_'.$i.'"  name="imagename['.$i.']">';
     echo '<option value="">None</option>';
     echo '<option value="images/wreath.jpg">Wreath</option>';
     echo '<option value="images/santa.jpg">Santa</option>';
     echo '<option value="images/jukebox.jpg">Jukebox</option>';
     echo '<option value="images/rickynelson.jpg">Ricky Nelson</option>';
     echo '<option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
-    echo '                        </select></td>'."\n";
+    echo '</select>'."\n";
+    echo '                        </td>'."\n";
+    echo '                        <td id="ib_tr_'.$i.'"><button type="button" id="img_switch_bt_'.$i.'" class="btn btn-secondary" onclick="img_switch_fn('.$i.')">Change</button></td>'."\n";
     echo '                    </tr>'."\n";
 
 }
@@ -595,9 +550,9 @@ for ($i = 1; $i <= 20; $i ++) {
             <h4>
                 Font
             </h4>
-            <input id="font_01" type="radio" name="titlefont" value="Times"                    ><label for="font_01">Times</label><br>
-            <input id="font_02" type="radio" name="titlefont" value="Helvetica"                ><label for="font_02">Helvetica</label><br>
-            <input id="font_03" type="radio" name="titlefont" value="Courier" checked="checked"><label for="font_03">Courier</label>
+            <input id="font_01" type="radio" name="titlefont" value="Times"                      ><label for="font_01">Times</label><br>
+            <input id="font_02" type="radio" name="titlefont" value="Helvetica" checked="checked"><label for="font_02">Helvetica</label><br>
+            <input id="font_03" type="radio" name="titlefont" value="Courier"                    ><label for="font_03">Courier</label>
             <h4>
                 Font Color
             </h4>
@@ -650,10 +605,10 @@ for ($i = 1; $i <= 20; $i ++) {
             </h4>
             <p>
                 <label for="artist_upper_id">Convert all artist names to upper case</label>
-                <input type="checkbox" id="artist_upper_id" name="artist_upper" value="artist_upper_case">
+                <input type="checkbox" id="artist_upper_id" name="artist_upper" value="artist_upper_case" <?php echo $artist_upper_id_checked ?>>
                 <br>
                 <label for="track_upper_id">Convert all track names to upper case</label>
-                <input type="checkbox" id="track_upper_id" name="track_upper" value="track_upper_case">
+                <input type="checkbox" id="track_upper_id"  name="track_upper"  value="track_upper_case"  <?php echo $track_upper_id_checked ?>>
             </p>
             <p>
                 <!--  Reset doesn't work if form is already populated at start, javascript could help -->

@@ -8,11 +8,22 @@ See the attached license file(s) for GNU GPL license.
 
 ## V3 Changes
 
+### V3.1.0
+
+This was pushed for release faster than expected, as the regular site scraping of Discogs had broken (they added a javascriopt check which curl couldn't work with). Now that the API is configured, future changes should be easier.
+
+1. Made more columns with show/hide buttons.
+2. Changed the Discogs integration to use proper API
+3. Extended the Discogs integration to get more items including release year information (Tried to import album art, but they have blocked the external image links. Tried to get publisher information but old scraping method broke).
+4. Technical reworking to split out code into classes, e.g. the submitted form data (reusable in form and strip creation).
+5. Lots of behind-the-scenes technical changes and tweaks (these should make future enhancements easier).
+6. Some little UI tweaks.
+
 ### V3.0.0
 
 1. New php driven input form (html page archived to html4form.html)
 2. Discogs.com integration (give a url for discogs and fetch data)
-3. Update indec page to use HTML 5 & bootstrap
+3. Update index page to use HTML 5 & bootstrap
 4. Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex)
 5. Show/hide columns for publisher (A lesser used function to make form cleaner)
 6. Added an option to convert all artist and/or track names to upper case
@@ -24,7 +35,6 @@ See the attached license file(s) for GNU GPL license.
 * Add/enhance fonts, try:
   * http://www.fpdf.org/en/tutorial/tuto7.htm
    * https://www.dafont.com/metal-lord.font
-* Import artwork from discogs
 * Make more options global OR label speciffic (such as hit/other markings)
 * Artist/track speciffic fonts (optional)
 * Image based backgrund for labels rather than drawing them (more options)
@@ -32,6 +42,7 @@ See the attached license file(s) for GNU GPL license.
   * More dynamic sizing
   * Ink saving (don't print empty boxes)
   * Combined image/text only labels
+* Import/export the form/label data as CSV
 
 ## V2 Changes (Stephen Rice)
 
@@ -51,7 +62,7 @@ At time of writing, all mirrors of original seem to be down... Fortunately Steve
 > I've cobbled together a jukebox title stripper for use via the web.
 It is located at:
 > http://www.refundersrefuge.org/simplestripper/index.html
-> 
+>
 > This version doesn't let you store information (future version, I promise).
 If you can think of any features BESIDES that, please let me know. I would
 set it up to print directly onto the blank sheets, but I don't have any.
@@ -68,7 +79,7 @@ cd title cards, and I'm not adding them. The source is there, you can
 do it, or get someone else to do it for you.
 >
 > Going to start working on a standalone version. That will be Free.
-> 
+>
 > It'll be there for the forseeable future. If I move it, I'll put a
 redirector, but I don't see that happening. Feel free to grab the files and
 put it on your own sight as well, if you wish. I just had to write it,
@@ -87,4 +98,5 @@ Some other implementations, and hosting of version 2.4 and below:
 * Stephen Rice: http://www.n4yza.com/jukebox/jukebox_labels/index.html
 * GraphicStripper v 0.0.2: http://www.pinballrebel.com/archive/other/onlinenew/index.html
 * SimpleStripper v 0.0.2: http://www.pinballrebel.com/archive/other/onlinestrips/index.html
-* https://www.mikesarcade.com/arcade/titlestrips.html
+* Mikes Arcade: https://www.mikesarcade.com/arcade/titlestrips.html
+* Isolated Desert Compound (an awesome javascript form implementation, with templates for using a laser cutter): https://www.isolateddesertcompound.com/stripper/
