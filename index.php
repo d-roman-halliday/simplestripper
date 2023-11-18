@@ -240,11 +240,11 @@ if ($debug_output) {
                     $external_site_year_preference_checked_r = '';
                     if ($ex_manager->external_site_year_preference === 'R') {$external_site_year_preference_checked_r  = 'checked="checked"';}
 
-                    $external_site_LabelName_include_checked = '';
-                    if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
+                    $external_site_LabelName_include_checked = ''; // Not in basic API
+                    //if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
 
-                    $external_site_CatalogNumber_include_checked = '';
-                    if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
+                    $external_site_CatalogNumber_include_checked = ''; // Not in basic API
+                    //if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
 
                     // Title Strip Configuration
                     $artist_upper_id_checked = '';
@@ -267,7 +267,9 @@ if ($debug_output) {
 
                     //Get array of data from URL
                     if (isset($discogs_url) and strlen(trim($discogs_url)) > 0) { // we have a request to work with
-                        $trackArray = external_site_parser_discogs($discogs_url,$discogs_artist_pref,$debug_output);
+                        // New: Using API from discogs
+                        $api_client = new discogs_api_client;
+                        $trackArray = $api_client->get_track_data_from_url($discogs_url,$discogs_artist_pref,$debug_output);
                     }
 
                     ////////////////////////////////////////////////////////////
@@ -442,7 +444,7 @@ if ($debug_output) {
                 <input type="radio" id="external_site_release_artist_preference_id_t" name="external_site_release_artist_preference" value="T" <?php echo $external_site_release_artist_preference_checked_t; ?>><br>
             </p>
             <p>
-                <label for="external_site_year_preference_id_n">Don't include relese year</label>
+                <label for="external_site_year_preference_id_n">Don't include Release Year</label>
                 <input type="radio" id="external_site_year_preference_id_n" name="external_site_year_preference" value="N" <?php echo $external_site_year_preference_checked_n; ?>><br>
                 <label for="external_site_year_preference_id_l">Release Year in Left Bar</label>
                 <input type="radio" id="external_site_year_preference_id_l" name="external_site_year_preference" value="L" <?php echo $external_site_year_preference_checked_l; ?>><br>
@@ -451,11 +453,14 @@ if ($debug_output) {
 
             </p>
             <p>
+                <!-- Not available in basic API -->
+<!--
                 <label for="external_site_LabelName_include_id">Include Label Name</label>
                 <input type="checkbox" id="external_site_LabelName_include_id"     name="external_site_LabelName_include"     value="external_site_LabelName_include_t"     <?php echo $external_site_LabelName_include_checked; ?>>
                 <br>
                 <label for="external_site_CatalogNumber_include_id">Include Catalog Number</label>
                 <input type="checkbox" id="external_site_CatalogNumber_include_id" name="external_site_CatalogNumber_include" value="external_site_CatalogNumber_include_t" <?php echo $external_site_CatalogNumber_include_checked; ?>>
+-->
             </p>
             <p>
                 <input type="submit" value="Submit">
@@ -515,12 +520,20 @@ for ($i = 1; $i <= 20; $i ++) {
 
     } else {
 
+        // Artist/Trak A (and all other data from the release)
         if (!is_null($trackArray) && is_array($trackArray) && isset($trackArray[0])) {
             $trackData = array_shift($trackArray);
             $row_track_a  = $trackData['trackName'];
             $row_artist_a = $trackData['displayArtist'];
+
+            // Release Year
+            if(!is_null($trackData['releaseYear'])) {
+                if ($ex_manager->external_site_year_preference === 'L') { $row_left_bar = $trackData['releaseYear']; }
+                if ($ex_manager->external_site_year_preference === 'R') { $row_right_bar = $trackData['releaseYear']; }
+            }
         }
 
+        // Artist/Trak B
         if (!is_null($trackArray) && is_array($trackArray) && isset($trackArray[0])) {
             $trackData = array_shift($trackArray);
             $row_track_b  = $trackData['trackName'];
@@ -531,6 +544,7 @@ for ($i = 1; $i <= 20; $i ++) {
         if ($row_artist_a == $row_artist_b) {
             $row_artist_b = '';
         }
+
     }
 
     //Clean up HTML display characters...

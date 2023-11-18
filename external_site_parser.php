@@ -30,6 +30,220 @@ class external_site_manager {
         }
     }
 }
+
+
+class discogs_api_client {
+
+    private $user_agent = 'SimpleStripper/3.1 +https://github.com/d-roman-halliday/simplestripper'; // https://www.discogs.com/developers
+    private $timeout = 2; // 2 is seconds
+
+    private $api_client_AuthConfigured = False;
+    private $api_client_ConsumerKey;
+    private $api_client_ConsumerSecret;
+
+    function __construct(){
+        ////////////////////////////////////////////////////////////////////////
+        // Configure authentication for API
+        ////////////////////////////////////////////////////////////////////////
+
+        ////////////////////////////////////////////////////////////////////////
+        // Try from env variables
+        if (   null !== getenv('DISCOGS_API_CLIENT_KEY')
+            && strlen(trim(getenv('DISCOGS_API_CLIENT_KEY')))
+           ) {
+            $this->api_client_ConsumerKey = getenv('DISCOGS_API_CLIENT_KEY');
+        }
+        if (   null !== getenv('DISCOGS_API_CLIENT_SECRET')
+            && strlen(trim(getenv('DISCOGS_API_CLIENT_SECRET'))) ) {
+            $this->api_client_ConsumerSecret = getenv('DISCOGS_API_CLIENT_KEY');
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Try from apache config (less secure, as can be surfaced by phpinfo())
+        if (   null !== ini_get('DISCOGS_API_CLIENT_KEY')
+            && strlen(trim(ini_get('DISCOGS_API_CLIENT_KEY')))
+           ) {
+            $this->api_client_ConsumerKey = trim(ini_get('DISCOGS_API_CLIENT_KEY'));
+        }
+        if (   null !== ini_get('DISCOGS_API_CLIENT_SECRET')
+            && strlen(trim(ini_get('DISCOGS_API_CLIENT_SECRET'))) ) {
+            $this->api_client_ConsumerSecret = trim(ini_get('DISCOGS_API_CLIENT_KEY'));
+        }
+
+        ////////////////////////////////////////////////////////////////////////
+        // If we got configuration, set a boolean value
+        if (   strlen($this->api_client_ConsumerSecret) > 1
+            && strlen($this->api_client_ConsumerKey)    > 1
+           ) {
+            $this->api_client_AuthConfigured = True;
+        }
+
+    }
+
+    public function get_track_data_from_url($discogs_url, $discogs_artist_pref, $debug_output = False){
+        ////////////////////////////////////////////////////////////////////////
+        //Output Var
+        ////////////////////////////////////////////////////////////////////////
+        $trackArray = [];
+
+        ////////////////////////////////////////////////////////////////////////
+        // manage API Endpoint request
+        // Using regex, extract information from regular URL and build API request
+        ////////////////////////////////////////////////////////////////////////
+        if ($debug_output) { echo "<p>URL Requested: $discogs_url</p>"; }
+
+        $pattern_regex = "/(master|release)\/([0-9]*)/i";
+        $match_1 = preg_match($pattern_regex, $discogs_url, $matches_array);
+
+        $dump_debug_regex = False;
+        if ($debug_output && $dump_debug_regex) {
+            echo "<p>match: $matches_array[0] - $matches_array[1] : $matches_array[2]</p>";
+            echo "<pre>";
+            print_r($matches_array);
+            echo "</pre>";
+        }
+        $discogs_item_type = $matches_array[1];
+        $discogs_item_id = $matches_array[2];
+
+        $discogs_api_endpoint = 'Unset';
+        if ( $discogs_item_type == 'release') {
+            $discogs_api_endpoint = "https://api.discogs.com/releases/$discogs_item_id";
+        }
+        if ( $discogs_item_type == 'master') {
+            $discogs_api_endpoint = "https://api.discogs.com/masters/$discogs_item_id";
+        }
+
+        if ($debug_output) { echo "<p>API Endpoint Request: $discogs_api_endpoint</p>"; }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Configure cURL and make request
+        // Building & Testing can be done with: https://incarnate.github.io/curl-to-php/
+        ////////////////////////////////////////////////////////////////////////
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $discogs_api_endpoint);
+        curl_setopt($ch, CURLOPT_USERAGENT, $this->user_agent);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the result from the request rather than dumping it out (and returning the status)
+        
+        if ($this->api_client_AuthConfigured == True) {
+            ////////////////////////////////////////////////////////////////////
+            // API Authentication information
+            ////////////////////////////////////////////////////////////////////
+            $headers = array();
+            $headers[] = "Authorization: Discogs key=$this->api_client_ConsumerKey, secret=$this->api_client_ConsumerSecret";
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
+
+        $api_responce = curl_exec($ch);
+
+        curl_close($ch);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Parse API responce
+        ////////////////////////////////////////////////////////////////////////
+        $api_responce = json_decode($api_responce);
+
+        ////////////////////////////////////////////////////////////////////////
+        // Release level data
+        $releaseYear = $api_responce->year;
+        $releaseArtistName = $api_responce->artists[0]->name;
+
+        ////////////////////////////////////////////////////////////////////////
+        // Track level
+        if ($debug_output) { echo "<h3>Track Dta</h3><p>"; }
+
+        foreach ($api_responce->tracklist as $item) {
+            ////////////////////////////////////////////////////////////////////
+            // Get data from JSON
+            $trackData['trackName'] = $item->title;
+            $trackData['trackPosition'] = $item->position;
+
+            $trackData['trackArtist'] = '';
+            if (   !is_null($item->artists)
+                && is_array($item->artists)
+                && isset($item->artists[0]) ) {
+                $trackData['trackArtist'] = $item->artists[0]->name; // always first item in array (if exists)
+            }
+
+            $trackData['releaseArtist'] = $releaseArtistName;
+            $trackData['releaseYear'] = $releaseYear;
+
+            // These items were available in the data from website but not in basic API endpoint
+            //$trackData['releaseCountry'] = $releaseCountry;
+            //$trackData['releaseLabelCatalogNumber'] = $releaseLabelCatalogNumber;
+            //$trackData['releaseLabelName'] = $releaseLabelName;
+            //$trackData['releaseArtworkURL'] = $releaseImageRef; //Note : This seems to get blocked on the server by cloudflair (preventing external scraping/hosting)
+
+            ////////////////////////////////////////////////////////////////////
+            // If this is a row of information without a track position, skip
+            if (strlen(trim($trackData['trackPosition'])) == 0) {
+                continue;
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Calculate Track or Release level artist info
+            if ($discogs_artist_pref == "T") {
+                $trackData['displayArtist'] = $trackData['trackArtist'];
+            }
+
+            if ($discogs_artist_pref == "R") {
+                $trackData['displayArtist'] = $trackData['releaseArtist'];
+            }
+
+            // If the prefference didn't work, try whateever has a value
+            if (strlen(trim($trackData['displayArtist'])) == 0) {
+                $trackData['displayArtist'] = $trackData['trackArtist'];
+            }
+
+            if (strlen(trim($trackData['displayArtist'])) == 0) {
+                $trackData['displayArtist'] = $trackData['releaseArtist'];
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // strip a trailing number in brackets (for artists where there are more than one with the same name)
+            if (    (strpos($trackData['displayArtist'], '(') !== false) //str_contains() is a PHP8 new function
+                and (strpos($trackData['displayArtist'], ')') !== false)
+               ) {
+                $trackData['displayArtist'] = trim(preg_replace('/\([0-9]*\)$/i', '', $trackData['displayArtist']));
+            }
+
+            if ($debug_output) {
+                echo 'Track: ' . $trackData['trackPosition'] . ' = ' . $trackData['trackName'] . ' by '. $trackData['displayArtist'] .'(' . $trackData['trackArtist'] . ' | ' . $trackData['releaseArtist'] . ')</br>' . "\n";
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Append to array
+            $trackArray[] = $trackData;
+
+        }
+
+        if ($debug_output) { echo "</p>"; }
+
+        ////////////////////////////////////////////////////////////////////////
+        // Dmup Output for debugging
+        ////////////////////////////////////////////////////////////////////////
+        $dump_variables = False; // Extra switch for debugging control
+        if ($debug_output and $dump_variables) {
+            echo '<h3>Variable Dumps (external_site_parser_discogs)</h3>' . "\n";
+            echo '<h4>Track Array</h4>' . "\n";
+            echo '<pre>' . "\n";
+            var_dump($trackArray);
+            echo '</pre>' . "\n";
+            echo '<h4>API Responce</h4>' . "\n";
+            echo '<pre>' . "\n";
+            var_dump($api_responce);
+            echo '</pre>' . "\n";
+            echo '<h4>discogs_api_client</h4>' . "\n";
+            echo '<pre>' . "\n";
+            var_dump($this);
+            echo '</pre>' . "\n";
+        }
+
+        return $trackArray;
+    }
+}
+
+
 function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debug_output = False){
 
     ////////////////////////////////////////////////////////////////////////////
