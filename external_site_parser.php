@@ -1,6 +1,45 @@
 <?php
 
+class external_site_manager {
+    public $external_site_url;
+    public $external_site_release_artist_preference = 'T'; // R = Release ¦ T = Track
+    public $external_site_year_preference = 'N';
+    public $external_site_LabelName_include = false;
+    public $external_site_CatalogNumber_include = false;
+
+    // Keeping this for refernce but it's not active as the site protection for discogs blocks it
+    public $external_site_image_preference;
+
+    function __construct(){
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->populate_post_variables();
+        }
+    }
+
+    protected function populate_post_variables(){
+        // Array Variables
+        $this->external_site_url = trim(stripslashes($_POST['external_site_url']));
+        $this->external_site_release_artist_preference = trim(stripslashes($_POST['external_site_release_artist_preference']));
+        $this->external_site_year_preference = trim(stripslashes($_POST['external_site_year_preference']));
+
+        if(isset($_POST['external_site_LabelName_include']) && $_POST['external_site_LabelName_include'] == 'external_site_LabelName_include_t') {
+            $this->external_site_LabelName_include = true;
+        }
+        if(isset($_POST['external_site_CatalogNumber_include']) && $_POST['external_site_CatalogNumber_include'] == 'external_site_CatalogNumber_include_t') {
+            $this->external_site_CatalogNumber_include = true;
+        }
+    }
+}
 function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debug_output = False){
+
+    ////////////////////////////////////////////////////////////////////////////
+    // BROKEN FOR NOW!
+    // Change in site checking for javascript breaks site parsing
+    // Since before: 2023-11-18
+    // Need to try discogs API
+    // e.g.  curl https://api.discogs.com/masters/96610 --user-agent "FooBarApp/3.0"
+    ////////////////////////////////////////////////////////////////////////////
+
 
     //initialise array (for any fetched data)
     $trackArray = array();
@@ -29,12 +68,16 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
 
         $ch = curl_init();
         $timeout = 5; // 5 is seconds
-        $userAgent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)';
+        $userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0';
+        //$cookie_file = tmpfile(); // as it wants them
+
         curl_setopt($ch, CURLOPT_URL, $webPageURL);
         curl_setopt($ch, CURLOPT_USERAGENT, $userAgent);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
         curl_setopt($ch, CURLOPT_HEADER, 1);
+        //curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_file);
+        //curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file);
         $webPageContent = curl_exec($ch);
         curl_close($ch);
 
@@ -56,14 +99,31 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
         // There is json data under : <script id="dsdata" type="application/json">
         $scripts = $htmlDom->getElementsByTagName('script');
 
+        // Debugging which found that javascript check breaks things
+        $dump_scripts = False; // Extra switch for debugging control
+        if ($debug_output and $dump_scripts) {
+            echo '<h3>Variable Dumps (external_site_parser_discogs)</h3>' . "\n";
+            echo '<h4>Dom</h4>' . "\n";
+            echo '<pre>' . "\n";
+            var_dump($htmlDom);
+            echo '</pre>' . "\n";
+            echo '<h4>Scripts</h4>' . "\n";
+            echo '<pre>' . "\n";
+            var_dump($scripts);
+            echo '</pre>' . "\n";
+        }
+
         // Loop through the DOMNodeList.
         // We can do this because the DOMNodeList object is traversable.
+        $json_data = '{"data":{}}';
         foreach ($scripts as $script) {
 
             // Get details from entity
             $scriptText = $script->nodeValue;
             $scriptType = $script->getAttribute('type');
             $scriptID   = $script->getAttribute('id');
+
+            //echo "<p>$scriptType - $scriptID</p>";
 
             // If the script type is empty, skip it and don't use
             if (strlen(trim($scriptType)) == 0) {
@@ -113,11 +173,6 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
             if ($itemType != 'Release') {
                 continue;
             }
-
-            echo '<h4>JSON Data - Release</h4>' . "\n";
-            //echo '<pre>' . "\n";
-            //var_dump($item);
-            //echo '</pre>' . "\n";
 
             $releaseArtistName = $item->primaryArtists[0]->displayName; // always first item in array
             $releaseYear = $item->released;
@@ -216,11 +271,6 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
             if ($itemType != 'Track') {
                 continue;
             }
-
-            //echo '<h4>JSON Data - Track</h4>' . "\n";
-            //echo '<pre>' . "\n";
-            //var_dump($item);
-            //echo '</pre>' . "\n";
 
             $trackData['trackName'] = $item->title;
             $trackData['trackPosition'] = $item->position;

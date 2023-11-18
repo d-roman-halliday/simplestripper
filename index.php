@@ -3,7 +3,7 @@
 // Setup & Config of page (main processing is set to happen in "debug output" area)
 ////////////////////////////////////////////////////////////////////////////////
 //Debugging Flag (so I can hide the ugly when not testing)
-$debug_output = false;
+$debug_output = true;
 
 require "titlestrip.php";
 require "external_site_parser.php";
@@ -216,14 +216,50 @@ if ($debug_output) {
                     ////////////////////////////////////////////////////////////////////////////
                     $ts_manager = new titlestrip_manager;
 
+                    ////////////////////////////////////////////////////////////////////////////
+                    // Parse any existing form information (for external site parsing)
+                    ////////////////////////////////////////////////////////////////////////////
+                    $ex_manager = new external_site_manager;
+
+                    ////////////////////////////////////////////////////////////
+                    // Form default values management
+                    ////////////////////////////////////////////////////////////
+
+                    // External Site Configuration
+                    $external_site_release_artist_preference_checked_t = 'checked="checked"';
+                    $external_site_release_artist_preference_checked_r = '';
+                    if (isset($discogs_artist_pref) and $discogs_artist_pref == "R") {
+                        $external_site_release_artist_preference_checked_t = '';
+                        $external_site_release_artist_preference_checked_r = 'checked="checked"';
+                    }
+
+                    $external_site_year_preference_checked_n = '';
+                    if ($ex_manager->external_site_year_preference === 'N') {$external_site_year_preference_checked_n  = 'checked="checked"';}
+                    $external_site_year_preference_checked_l = '';
+                    if ($ex_manager->external_site_year_preference === 'L') {$external_site_year_preference_checked_l  = 'checked="checked"';}
+                    $external_site_year_preference_checked_r = '';
+                    if ($ex_manager->external_site_year_preference === 'R') {$external_site_year_preference_checked_r  = 'checked="checked"';}
+
+                    $external_site_LabelName_include_checked = '';
+                    if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
+
+                    $external_site_CatalogNumber_include_checked = '';
+                    if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
+
+                    // Title Strip Configuration
+                    $artist_upper_id_checked = '';
+                    if ($ts_manager->artist_upper_case) {$artist_upper_id_checked = 'checked="checked"';}
+
+                    $track_upper_id_checked = '';
+                    if ($ts_manager->track_upper_case) {$track_upper_id_checked  = 'checked="checked"';}
+
+
                     ////////////////////////////////////////////////////////////
                     // Request data from External URL (discogs)
                     ////////////////////////////////////////////////////////////
-
-                    //Get data from form (if submitted)
                     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                        $discogs_url = trim(stripslashes($_POST['discogs_url']));
-                        $discogs_artist_pref = trim(stripslashes($_POST['discogs_artist_pref']));
+                        $discogs_url = $ex_manager->external_site_url;
+                        $discogs_artist_pref = $ex_manager->external_site_release_artist_preference;
                     }
 
                     //Initialise array (for any fetched data)
@@ -232,16 +268,6 @@ if ($debug_output) {
                     //Get array of data from URL
                     if (isset($discogs_url) and strlen(trim($discogs_url)) > 0) { // we have a request to work with
                         $trackArray = external_site_parser_discogs($discogs_url,$discogs_artist_pref,$debug_output);
-                    }
-
-                    //Default values (preference for track/release artist)
-                    $t_checked = 'checked="checked"';
-                    $r_checked = '';
-
-                    //Change settings for dislay of form (preference for track/release artist)
-                    if (isset($discogs_artist_pref) and $discogs_artist_pref == "R") {
-                        $t_checked = '';
-                        $r_checked = 'checked="checked"';
                     }
 
                     ////////////////////////////////////////////////////////////
@@ -253,6 +279,10 @@ if ($debug_output) {
                         echo '<h4>Track Array</h4>' . "\n";
                         echo '<pre>' . "\n";
                         var_dump($trackArray);
+                        echo '</pre>' . "\n";
+                        echo '<h4>External Site Manager</h4>' . "\n";
+                        echo '<pre>' . "\n";
+                        var_dump($ex_manager);
                         echo '</pre>' . "\n";
                         echo '<h4>Title Strips Manager</h4>' . "\n";
                         echo '<pre>' . "\n";
@@ -400,9 +430,34 @@ if ($debug_output) {
             <h3>Discogs</h3>
             <p>Get data from discogs and append to strip information. This will append to the rows below, note for now only artist and track names will be loaded and refreshed.</p>
             <p>
-                <input type="text"  name="discogs_url" id="discogs_url" ><br>
-                <input type="radio" name="discogs_artist_pref" value="R" <?php echo $r_checked; ?>>Prefer Release Artist<br>
-                <input type="radio" name="discogs_artist_pref" value="T" <?php echo $t_checked; ?>>Prefer Track Artist<br>
+                <input type="text"  name="external_site_url" id="external_site_url_id" ><br>
+            </p>
+            <h4>
+                External Site Configurations
+            </h4>
+            <p>
+                <label for="external_site_release_artist_preference_id_r">Prefer Release Artist</label>
+                <input type="radio" id="external_site_release_artist_preference_id_r" name="external_site_release_artist_preference" value="R" <?php echo $external_site_release_artist_preference_checked_r; ?>><br>
+                <label for="external_site_release_artist_preference_id_t">Prefer Track Artist</label>
+                <input type="radio" id="external_site_release_artist_preference_id_t" name="external_site_release_artist_preference" value="T" <?php echo $external_site_release_artist_preference_checked_t; ?>><br>
+            </p>
+            <p>
+                <label for="external_site_year_preference_id_n">Don't include relese year</label>
+                <input type="radio" id="external_site_year_preference_id_n" name="external_site_year_preference" value="N" <?php echo $external_site_year_preference_checked_n; ?>><br>
+                <label for="external_site_year_preference_id_l">Release Year in Left Bar</label>
+                <input type="radio" id="external_site_year_preference_id_l" name="external_site_year_preference" value="L" <?php echo $external_site_year_preference_checked_l; ?>><br>
+                <label for="external_site_year_preference_id_r">Release Year in Right Bar</label>
+                <input type="radio" id="external_site_year_preference_id_r" name="external_site_year_preference" value="R" <?php echo $external_site_year_preference_checked_r; ?>><br>
+
+            </p>
+            <p>
+                <label for="external_site_LabelName_include_id">Include Label Name</label>
+                <input type="checkbox" id="external_site_LabelName_include_id"     name="external_site_LabelName_include"     value="external_site_LabelName_include_t"     <?php echo $external_site_LabelName_include_checked; ?>>
+                <br>
+                <label for="external_site_CatalogNumber_include_id">Include Catalog Number</label>
+                <input type="checkbox" id="external_site_CatalogNumber_include_id" name="external_site_CatalogNumber_include" value="external_site_CatalogNumber_include_t" <?php echo $external_site_CatalogNumber_include_checked; ?>>
+            </p>
+            <p>
                 <input type="submit" value="Submit">
             </p>
             <h3>Strip Details</h3>
@@ -600,10 +655,10 @@ for ($i = 1; $i <= 20; $i ++) {
             </h4>
             <p>
                 <label for="artist_upper_id">Convert all artist names to upper case</label>
-                <input type="checkbox" id="artist_upper_id" name="artist_upper" value="artist_upper_case">
+                <input type="checkbox" id="artist_upper_id" name="artist_upper" value="artist_upper_case" <?php echo $artist_upper_id_checked ?>>
                 <br>
                 <label for="track_upper_id">Convert all track names to upper case</label>
-                <input type="checkbox" id="track_upper_id" name="track_upper" value="track_upper_case">
+                <input type="checkbox" id="track_upper_id"  name="track_upper"  value="track_upper_case"  <?php echo $track_upper_id_checked ?>>
             </p>
             <p>
                 <!--  Reset doesn't work if form is already populated at start, javascript could help -->
