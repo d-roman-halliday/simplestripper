@@ -8,13 +8,14 @@ See the attached license file(s) for GNU GPL license.
 
 ## V3 Changes
 
-### V3.1
+### V3.1.0
 
 1. Made more columns with show/hide buttons.
-2. Extended the discogs integration to get more items including publisher information (Tried to import album art, but they have block the external image links). 
-3. Technical reworking to split out code into classes, e.g. the submitted form data (reusable in form and strip creation).
-4. Lots of behind the scenes technical changes and tweaks (these should make future enhancements easier).
-5. Some little UI tweaks.
+2. Changed the iscogs inteagration to use proper API
+3. Extended the discogs integration to get more items including release year information (Tried to import album art, but they have block the external image links. Tried to get publisher informatio but old scrapingmethod broke). 
+4. Technical reworking to split out code into classes, e.g. the submitted form data (reusable in form and strip creation).
+5. Lots of behind the scenes technical changes and tweaks (these should make future enhancements easier).
+6. Some little UI tweaks.
 
 ### V3.0.0
 
@@ -59,7 +60,7 @@ At time of writing, all mirrors of original seem to be down... Fortunately Steve
 > I've cobbled together a jukebox title stripper for use via the web.
 It is located at:
 > http://www.refundersrefuge.org/simplestripper/index.html
-> 
+>
 > This version doesn't let you store information (future version, I promise).
 If you can think of any features BESIDES that, please let me know. I would
 set it up to print directly onto the blank sheets, but I don't have any.
@@ -76,7 +77,7 @@ cd title cards, and I'm not adding them. The source is there, you can
 do it, or get someone else to do it for you.
 >
 > Going to start working on a standalone version. That will be Free.
-> 
+>
 > It'll be there for the forseeable future. If I move it, I'll put a
 redirector, but I don't see that happening. Feel free to grab the files and
 put it on your own sight as well, if you wish. I just had to write it,

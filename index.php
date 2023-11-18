@@ -3,7 +3,7 @@
 // Setup & Config of page (main processing is set to happen in "debug output" area)
 ////////////////////////////////////////////////////////////////////////////////
 //Debugging Flag (so I can hide the ugly when not testing)
-$debug_output = true;
+$debug_output = false;
 
 require "titlestrip.php";
 require "external_site_parser.php";
@@ -130,78 +130,13 @@ if ($debug_output) {
                         Key Release history
                     </h2>
                     <p>
-                        SimpleStripper v 3 (2023) Tweaked by David Roman-Halliday<br />
+                        SimpleStripper v 3 (2023) Remodeled by David Roman-Halliday<br />
                         Modified from v 2 (02/27/2020) Extensively Modified by Stephen Rice.<br />
                         Originally written by George Howell (2001)?
                     </p>
-                    <h3>Key Changes v3</h3>
-                    <h4>
-                        v3.1
-                    </h4>
-                    <ul>
-                        <li>URL input for image (now any image can be used, made to fit by height).
-                            <ul>
-                                <li><b>Note:</b>Many images fail to load/insert because FPDF doesnn't support them (even if they are a jpg or png)</li>
-                            </ul>
-                        </li>
-                        <li>Background Changes:
-                            <ul>
-                                <li>Independant class for titlestrip manipulations and POST interaction (reusable and clean).</li>
-                                <li>Bug fixes: Resolving some bugs coming up in error log (not visible in front end).</li>
-                                <li>Discogs integration now also retrives: Release year, Publisher info, Album art URL</li>
-                                <li><b>Note:</b>RAlbumart URL fails when requested from server (protectiuon against remte image hosting and parsing their images). Big dissapointment.</li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <h4>
-                        V3 Core Version
-                    </h4>
-                    <ul>
-                        <li>New php driven input form (html page archived to html4form.html).</li>
-                        <li>Discogs.com integration (give a url for discogs and fetch data).</li>
-                        <li>Update index page to use HTML 5 &amp; bootstrap.</li>
-                        <li>Customise output artist box styles, provide a box to select different artist box style (Arrow, square, hex).</li>
-                        <li>Show/hide columns for publisher (A lesser used function to make the form cleaner).</li>
-                        <li>Added an option to convert all artist and/or track names to upper case.</li>
-                        <li>Bug fix: Better handling of double quotes in the form.</li>
-                        <li>Bug fix: Stripping spaces from start/finish of artists/titles.</li>
-                    </ul>
-                    <h4>
-                        Planned Changes &amp; Suggestions for the future
-                    </h4>
-                    <ul>
-                        <li>Import data using the<a href='https://musicbrainz.org/doc/MusicBrainz_API'>MusicBrainz API</a></li>
-                        <li>Import artwork from discogs/MusicBrainz. Note: Discogs prevents the remote interaction.</li>
-                        <li>Make more options global OR label speciffic (such as hit/other markings)</li>
-                        <li>More fonts</li>
-                        <li>Artist/track speciffic fonts (optional)</li>
-                        <li>Image based backgrund for labels rather than drawing them (more options)</li>
-                        <li>Rework drawing to allow for:
-                            <ul>
-                                <li>More dynamic sizing</li>
-                                <li>Ink saving (don't print empty boxes)</li>
-                                <li>combined image/text only labels</li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <h3>Key Changes v2</h3>
+                    <h2>Getting The Code &amp; Release Information</h2>
                     <p>
-                        Made by Stephen Rice
-                    </p>
-                    <ul>
-                        <li>You now can print a page without any lines on it in case you prefer to use pre printed labels.</li>
-                        <li>Updates have been done to remain compliant with the newer php server software.</li>
-                        <li>Included a updated FPDF version 1.82 software that handles printing in the zip file.</li>
-                        <li>You now have color pickers available so that you can change colors of different parts of the label. You should click on the color and pick a color and when done either click off the color or click r tab key. This allows you to have many more choices for the colors would like to print.</li>
-                        <li>The labels will now open in a new window so that all the information you have entered is still available if you want to make changes.</li>
-                    </ul>
-                    <h2>Older versions</h2>
-                    <p>
-                        By George Howell. At this time, all mirrors of original seem to be down... Fortunately Steve published the updated code (as linked above) so that open source idea of the software could continue.
-                    </p>
-                    <h2>Getting The Code</h2>
-                    <p>
-                        The code is available on github: <a href="https://github.com/d-roman-halliday/simplestripper">https://github.com/d-roman-halliday/simplestripper</a>
+                        The code, and release information (details of cahnges) are available on github: <a href="https://github.com/d-roman-halliday/simplestripper">https://github.com/d-roman-halliday/simplestripper</a>
                     </p>
                 </div>
 
@@ -430,9 +365,10 @@ if ($debug_output) {
             </script>
         <form method="post" name="record_entry">
             <h3>Discogs</h3>
-            <p>Get data from discogs and append to strip information. This will append to the rows below, note for now only artist and track names will be loaded and refreshed.</p>
+            <p>Get data from discogs and append to strip information. This will append to the rows below. For now only artist and track names (and release year if selected) will be loaded and refreshed.</p>
             <p>
-                <input type="text"  name="external_site_url" id="external_site_url_id" ><br>
+                <label for="external_site_url_id">Discogs URL:</label>
+                <input type="text"  id="external_site_url_id" name="external_site_url" id="external_site_url_id" ><br>
             </p>
             <h4>
                 External Site Configurations
@@ -614,9 +550,9 @@ for ($i = 1; $i <= 20; $i ++) {
             <h4>
                 Font
             </h4>
-            <input id="font_01" type="radio" name="titlefont" value="Times"                    ><label for="font_01">Times</label><br>
-            <input id="font_02" type="radio" name="titlefont" value="Helvetica"                ><label for="font_02">Helvetica</label><br>
-            <input id="font_03" type="radio" name="titlefont" value="Courier" checked="checked"><label for="font_03">Courier</label>
+            <input id="font_01" type="radio" name="titlefont" value="Times"                      ><label for="font_01">Times</label><br>
+            <input id="font_02" type="radio" name="titlefont" value="Helvetica" checked="checked"><label for="font_02">Helvetica</label><br>
+            <input id="font_03" type="radio" name="titlefont" value="Courier"                    ><label for="font_03">Courier</label>
             <h4>
                 Font Color
             </h4>
