@@ -163,7 +163,7 @@ if ($debug_output) {
                     // External Site Configuration
                     $external_site_release_artist_preference_checked_t = 'checked="checked"';
                     $external_site_release_artist_preference_checked_r = '';
-                    if (isset($discogs_artist_pref) and $discogs_artist_pref == "R") {
+                    if (isset($ex_manager->external_site_release_artist_preference) and $ex_manager->external_site_release_artist_preference == "R") {
                         $external_site_release_artist_preference_checked_t = '';
                         $external_site_release_artist_preference_checked_r = 'checked="checked"';
                     }

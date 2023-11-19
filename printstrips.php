@@ -24,6 +24,8 @@ $largefontsize = "16";
 $mediumfontsize = "12";
 $smallfontsize = "9";
 
+$ink_saver = False;
+
 // Get variables from POST and populate titlestrip objects
 $ts_manager = new titlestrip_manager;
 
@@ -32,6 +34,7 @@ $ts_manager = new titlestrip_manager;
 $pdf = new SsFpdfExtended('P', 'pt', 'Letter'); // Imported from cellz.php containing an extended version of FPDF
 $pdftitle = 'Jukebox Title Strips';
 $author = 'Simple Stripper Version 3.1 Modified by David Roman-Halliday';
+
 
 $pdf->SetTitle($pdftitle);
 $pdf->SetAuthor($author);
@@ -109,6 +112,20 @@ switch ($ts_manager->labeltype) {
         for ($horiz = 0; $horiz <= 1; $horiz ++) {
             // and do it zero to nine times for ten rows
             for ($vert = 0; $vert <= 9; $vert ++) {
+                // ####################################################
+                // Pick which record/strip to print based on which cell we are working on
+                // ####################################################
+                $recordtoprint = (($horiz * 10) + $vert + 1);
+
+                // ####################################################
+                // Skip if it's empty (ink saver)
+                // ####################################################
+                if (   $ink_saver == True
+                    && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == false
+                   ) {
+                    continue;
+                }
+
                 $pdf->SetFont($ts_manager->titlefont, $ts_manager->font_style, $fontsize);
                 if ($ts_manager->prelabel == "") {
                     // ###########################################################
@@ -127,6 +144,7 @@ switch ($ts_manager->labeltype) {
 
                     // ###########################################################
                     // START Print the LEFT and RIGHT lines of the labels Routine
+                    // NOTE: This prints both columns... Not sure why, breaks $ink_saver setting
                     // ###########################################################
                     $pdf->SetLineWidth(2);
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
@@ -275,12 +293,7 @@ switch ($ts_manager->labeltype) {
                     // End Make Box for Artist Routine
                     // #########################################
 
-                } // end if prelabe
-
-                // ####################################################
-                // next line picks which record to print based on which cell we are working on
-                // ####################################################
-                $recordtoprint = (($horiz * 10) + $vert + 1);
+                } // end if prelabe (creating box for strip)
 
                 // ####################################################
                 // Get text properties from strip
@@ -375,6 +388,20 @@ switch ($ts_manager->labeltype) {
         for ($horiz = 0; $horiz <= 1; $horiz ++) {
             // and do it nine times for ten rows
             for ($vert = 0; $vert <= 9; $vert ++) {
+                // ####################################################
+                // Pick which record/strip to print based on which cell we are working on
+                // ####################################################
+                $recordtoprint = (($horiz * 10) + $vert + 1);
+
+                // ####################################################
+                // Skip if it's empty (ink saver)
+                // ####################################################
+                if (   $ink_saver == True
+                    && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == false
+                   ) {
+                    continue;
+                }
+
                 $pdf->SetFont($ts_manager->titlefont, $font_style, $fontsize);
                 if ($ts_manager->prelabel == "") {
                     // ###########################################################
@@ -393,6 +420,7 @@ switch ($ts_manager->labeltype) {
 
                     // #############################################################################
                     // START Print the LEFT, Picture box line, and RIGHT lines of the labels Routine
+                    // NOTE: This prints both columns... Not sure why, breaks $ink_saver setting
                     // #############################################################################
                     $pdf->SetLineWidth(2);
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
@@ -414,7 +442,7 @@ switch ($ts_manager->labeltype) {
                     if ($ts_manager->artistbgr) {
                         $pdf->SetFillColor($artiststripbgr, $artiststripbgg, $artiststripbgb);
                     } else {
-                        $pdf->SetFillColor(255, 255, 255); // whiite/blank
+                        $pdf->SetFillColor(255, 255, 255); // white/blank
                     }
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
                     $pdf->Rect(82 + $horiz * 288, 45 + $vert * 72, 154, 18, 'DF');
@@ -428,10 +456,6 @@ switch ($ts_manager->labeltype) {
                 // Get text properties from strip
                 // Including: combine artist a and b into one string if needed
                 // ####################################################
-
-
-                // next line picks which record to print based on which cell we are working on
-                $recordtoprint = (($horiz * 10) + $vert + 1);
 
                 $track_a = $ts_manager->titlestrips[$recordtoprint]->track_a;
                 $track_b = $ts_manager->titlestrips[$recordtoprint]->track_b;
