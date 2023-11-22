@@ -3,7 +3,7 @@
 // Setup & Config of page (main processing is set to happen in "debug output" area)
 ////////////////////////////////////////////////////////////////////////////////
 //Debugging Flag (so I can hide the ugly when not testing)
-$debug_output = false;
+$debug_output = False;
 
 require "titlestrip.php";
 require "external_site_parser.php";
@@ -190,7 +190,8 @@ if ($debug_output) {
 
                     $ink_saver_id_checked = '';
                     if ($ts_manager->ink_saver) {$ink_saver_id_checked  = 'checked="checked"';}
-
+                    $prelabel_id_checked = '';
+                    if ($ts_manager->prelabel) {$prelabel_id_checked  = 'checked="checked"';}
 
                     ////////////////////////////////////////////////////////////
                     // Request data from External URL (discogs)
@@ -588,11 +589,6 @@ for ($i = 1; $i <= 20; $i ++) {
             <input id="labeltype_t" type="radio" name="labeltype" value="text" checked="checked" ><label for="labeltype_t">TEXT</label><br>
             <input id="labeltype_i" type="radio" name="labeltype" value="image"                  ><label for="labeltype_i">IMAGE</label>
             <h4>
-                Pre Printed Labels
-            </h4>
-            <input id="prelabel_y" type="radio" name="prelabel" value="Y"                  ><label for="prelabel_y">Yes</label><br>
-            <input id="prelabel_n" type="radio" name="prelabel" value="" checked="checked" ><label for="prelabel_n">No</label>
-            <h4>
                 Artist Box
             </h4>
             <p>
@@ -616,17 +612,16 @@ for ($i = 1; $i <= 20; $i ++) {
             <h4>
                 Output Settings
             </h4>
-            <p>
-                <label for="ink_saver_id">Ink Saver (don't print empty boxes)</label>
-                <input type="checkbox" id="ink_saver_id" name="ink_saver" value="ink_saver" <?php echo $ink_saver_id_checked ?>>
-            </p>
-
-            <p>
+            <div class="form-check form-switch">
+                <label for="ink_saver_id" class="form-check-label" >Ink Saver (don't print empty boxes)</label>
+                <input id="ink_saver_id"  class="form-check-input" type="checkbox" role="switch" name="ink_saver" value="ink_saver" <?php echo $ink_saver_id_checked ?>>
+                <br>
+                <label for="prelabel_id" class="form-check-label">Pre Printed Labels (don't print outlines and boxes)</label>
+                <input id="prelabel_id"  class="form-check-input" type="checkbox" role="switch" name="prelabel" value="prelabel" <?php echo $prelabel_id_checked ?>>
+            </div>
                 <!--  Reset doesn't work if form is already populated at start, javascript could help -->
                 <!-- <button name="Reset"  type="reset">Clear All Fields</button>-->
                 <button name="Submit" type="submit" formaction="printstrips.php" formtarget="_blank">Create PDF</button>
-            </p>
-
         </form>
         </div>
     </body>

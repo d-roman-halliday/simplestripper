@@ -119,13 +119,13 @@ switch ($ts_manager->labeltype) {
                 // Skip if it's empty (ink saver)
                 // ####################################################
                 if (   $ts_manager->ink_saver == True
-                    && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == false
+                    && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == False
                    ) {
                     continue;
                 }
 
                 $pdf->SetFont($ts_manager->titlefont, $ts_manager->font_style, $fontsize);
-                if ($ts_manager->prelabel == "") {
+                if ( ! $ts_manager->prelabel) {
                     // ###########################################################
                     // START Print the top and bottom lines of the labels Routine
                     // ###########################################################
@@ -392,13 +392,13 @@ switch ($ts_manager->labeltype) {
                 // Skip if it's empty (ink saver)
                 // ####################################################
                 if (   $ts_manager->ink_saver == True
-                    && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == false
+                    && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == False
                    ) {
                     continue;
                 }
 
                 $pdf->SetFont($ts_manager->titlefont, $font_style, $fontsize);
-                if ($ts_manager->prelabel == "") {
+                if ( ! $ts_manager->prelabel) {
                     // ###########################################################
                     // START Print the top and bottom lines of the labels Routine
                     // ###########################################################
