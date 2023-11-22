@@ -188,6 +188,9 @@ if ($debug_output) {
                     $track_upper_id_checked = '';
                     if ($ts_manager->track_upper_case) {$track_upper_id_checked  = 'checked="checked"';}
 
+                    $ink_saver_id_checked = '';
+                    if ($ts_manager->ink_saver) {$ink_saver_id_checked  = 'checked="checked"';}
+
 
                     ////////////////////////////////////////////////////////////
                     // Request data from External URL (discogs)
@@ -610,6 +613,14 @@ for ($i = 1; $i <= 20; $i ++) {
                 <label for="track_upper_id">Convert all track names to upper case</label>
                 <input type="checkbox" id="track_upper_id"  name="track_upper"  value="track_upper_case"  <?php echo $track_upper_id_checked ?>>
             </p>
+            <h4>
+                Output Settings
+            </h4>
+            <p>
+                <label for="ink_saver_id">Ink Saver (don't print empty boxes)</label>
+                <input type="checkbox" id="ink_saver_id" name="ink_saver" value="ink_saver" <?php echo $ink_saver_id_checked ?>>
+            </p>
+
             <p>
                 <!--  Reset doesn't work if form is already populated at start, javascript could help -->
                 <!-- <button name="Reset"  type="reset">Clear All Fields</button>-->

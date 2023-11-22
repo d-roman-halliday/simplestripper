@@ -24,8 +24,6 @@ $largefontsize = "16";
 $mediumfontsize = "12";
 $smallfontsize = "9";
 
-$ink_saver = False;
-
 // Get variables from POST and populate titlestrip objects
 $ts_manager = new titlestrip_manager;
 
@@ -120,7 +118,7 @@ switch ($ts_manager->labeltype) {
                 // ####################################################
                 // Skip if it's empty (ink saver)
                 // ####################################################
-                if (   $ink_saver == True
+                if (   $ts_manager->ink_saver == True
                     && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == false
                    ) {
                     continue;
@@ -144,14 +142,11 @@ switch ($ts_manager->labeltype) {
 
                     // ###########################################################
                     // START Print the LEFT and RIGHT lines of the labels Routine
-                    // NOTE: This prints both columns... Not sure why, breaks $ink_saver setting
                     // ###########################################################
                     $pdf->SetLineWidth(2);
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                    $pdf->Line(16 + $horiz, 22 + $vert * 72, 16 + $horiz, 90 + $vert * 72);
-                    $pdf->Line(236 + $horiz, 22 + $vert * 72, 236 + $horiz, 90 + $vert * 72);
-                    $pdf->Line(303 + $horiz, 22 + $vert * 72, 303 + $horiz, 90 + $vert * 72);
-                    $pdf->Line(524 + $horiz, 22 + $vert * 72, 524 + $horiz, 90 + $vert * 72);
+                    $pdf->Line(16  + $horiz * 288, 22 + $vert * 72, 16  + $horiz * 288, 90 + $vert * 72);
+                    $pdf->Line(236 + $horiz * 288, 22 + $vert * 72, 236 + $horiz * 288, 90 + $vert * 72);
                     // ###########################################################
                     // END Print the LEFT and RIGHT lines of the labels Routine
                     // ###########################################################
@@ -199,7 +194,7 @@ switch ($ts_manager->labeltype) {
                         // START PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
                         // ##############################################
                         $pdf->SetFillColor($stripr, $stripg, $stripb);
-                        $pdf->Rect(17 + $horiz * 288, 50 + $vert * 72, 22, 9, 'FD');
+                        $pdf->Rect(17  + $horiz * 288, 50 + $vert * 72, 22, 9, 'FD');
                         $pdf->Rect(207 + $horiz * 288, 50 + $vert * 72, 28, 9, 'FD');
                         // ##############################################
                         // END PLACE BARS ON SIDE OF ARTIST BOX ROUTINE
@@ -211,7 +206,7 @@ switch ($ts_manager->labeltype) {
                         // /Start Make Arrow Heads for Artist Box
                         // ######################################
                         for ($arrow = 0; $arrow <= 12; $arrow ++) {
-                            $pdf->Line(39.2 + $horiz * 288, $arrow + 48 + $vert * 72, 44 + $horiz * 288, 55 + $vert * 72);
+                            $pdf->Line(39.2  + $horiz * 288, $arrow + 48 + $vert * 72, 44  + $horiz * 288, 55 + $vert * 72);
                             $pdf->Line(206.2 + $horiz * 288, $arrow + 48 + $vert * 72, 201 + $horiz * 288, 55 + $vert * 72);
                         }
                         // ######################################
@@ -396,7 +391,7 @@ switch ($ts_manager->labeltype) {
                 // ####################################################
                 // Skip if it's empty (ink saver)
                 // ####################################################
-                if (   $ink_saver == True
+                if (   $ts_manager->ink_saver == True
                     && $ts_manager->titlestrips[$recordtoprint]->has_set_values() == false
                    ) {
                     continue;
@@ -420,16 +415,12 @@ switch ($ts_manager->labeltype) {
 
                     // #############################################################################
                     // START Print the LEFT, Picture box line, and RIGHT lines of the labels Routine
-                    // NOTE: This prints both columns... Not sure why, breaks $ink_saver setting
                     // #############################################################################
                     $pdf->SetLineWidth(2);
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                    $pdf->Line(16  + $horiz, 22 + $vert * 72, 16  + $horiz, 90 + $vert * 72); // Print the Left Line col 1
-                    $pdf->Line(236 + $horiz, 22 + $vert * 72, 236 + $horiz, 90 + $vert * 72); // Print the left line col 2
-                    $pdf->Line(81  + $horiz, 22 + $vert * 72, 81  + $horiz, 90 + $vert * 72); // Print the right line next to the picture col 1
-                    $pdf->Line(369 + $horiz, 22 + $vert * 72, 369 + $horiz, 90 + $vert * 72); // Print the right line next to the picture col 2
-                    $pdf->Line(303 + $horiz, 22 + $vert * 72, 303 + $horiz, 90 + $vert * 72); // Print the right line col 1
-                    $pdf->Line(524 + $horiz, 22 + $vert * 72, 524 + $horiz, 90 + $vert * 72); // Print the right line col 2
+                    $pdf->Line(16  + $horiz * 288, 22 + $vert * 72, 16  + $horiz * 288, 90 + $vert * 72); // Print the Left Line
+                    $pdf->Line(236 + $horiz * 288, 22 + $vert * 72, 236 + $horiz * 288, 90 + $vert * 72); // Print the far right line
+                    $pdf->Line(81  + $horiz * 288, 22 + $vert * 72, 81  + $horiz * 288, 90 + $vert * 72); // Print the right line next to the picture
 
                     // ###########################################################
                     // END Print the LEFT and RIGHT lines of the labels Routine
@@ -445,7 +436,7 @@ switch ($ts_manager->labeltype) {
                         $pdf->SetFillColor(255, 255, 255); // white/blank
                     }
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
-                    $pdf->Rect(82 + $horiz * 288, 45 + $vert * 72, 154, 18, 'DF');
+                    $pdf->Rect(82 - 0.5 + $horiz * 288, 45 + $vert * 72, 154, 18, 'DF'); // Take 0.5 from width for even borders (line width)
 
                     // #########################################
                     // End Make Box for Artist Routine
@@ -497,14 +488,15 @@ switch ($ts_manager->labeltype) {
 
                         // Put temp file into PDF
                         $image_file = $ts_manager->titlestrips[$recordtoprint]->image_file_reference;
-                        $pdf->Image($image_file, 16.8 + $horiz * 288, 23.2 + $vert * 72, 0, 65);
+                        $pdf->Image($image_file, 17 + $horiz * 288, 23 + $vert * 72,  0, 66); // Fixed height, auto width
 
                         // Delete temp file downloaded
                         $ts_manager->titlestrips[$recordtoprint]->delete_local_image_file();
                     } else {
                         // Put existing file into PDF
                         $image_file = $ts_manager->titlestrips[$recordtoprint]->image_file_reference;
-                        $pdf->Image($image_file, 16.8 + $horiz * 288, 23.2 + $vert * 72, 0, 65);
+                        $pdf->Image($image_file, 17 + $horiz * 288, 23 + $vert * 72,  0, 66); // Fixed height, auto width
+                      //$pdf->Image($image_file, 17 + $horiz * 288, 23 + $vert * 72, 63, 66); // Fixed Dimensions
                     }
                 }
 

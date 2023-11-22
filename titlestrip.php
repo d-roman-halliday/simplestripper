@@ -202,6 +202,8 @@ class titlestrip_manager {
     public $artist_upper_case = false;
     public $track_upper_case = false;
 
+    public $ink_saver = false;
+
     // Array for title strips
     public $titlestrips = array();
 
@@ -256,10 +258,20 @@ class titlestrip_manager {
 
         if(isset($_POST['artist_upper']) && $_POST['artist_upper'] == 'artist_upper_case') {
             $this->artist_upper_case = true;
+        } else {
+            $this->artist_upper_case = false;
         }
 
         if(isset($_POST['track_upper']) && $_POST['track_upper'] == 'track_upper_case') {
             $this->track_upper_case = true;
+        } else {
+            $this->track_upper_case = false;
+        }
+
+        if(isset($_POST['ink_saver']) && $_POST['ink_saver'] == 'ink_saver') {
+            $this->ink_saver = true;
+        } else {
+            $this->ink_saver = false;
         }
 
     }
