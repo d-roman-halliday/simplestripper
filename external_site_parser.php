@@ -147,10 +147,13 @@ class discogs_api_client {
         // Release level data
         $releaseYear = $api_responce->year;
         $releaseArtistName = $api_responce->artists[0]->name;
+        $releaseLabelName = $api_responce->labels[0]->name;
+        $releaseLabelCatalogNumber = $api_responce->labels[0]->catno;
+        $releaseCountry = $api_responce->country;
 
         ////////////////////////////////////////////////////////////////////////
         // Track level
-        if ($debug_output) { echo "<h3>Track Dta</h3><p>"; }
+        if ($debug_output) { echo "<h3>Track Data</h3><p>"; }
 
         foreach ($api_responce->tracklist as $item) {
             ////////////////////////////////////////////////////////////////////
@@ -167,11 +170,11 @@ class discogs_api_client {
 
             $trackData['releaseArtist'] = $releaseArtistName;
             $trackData['releaseYear'] = $releaseYear;
+            $trackData['releaseLabelCatalogNumber'] = $releaseLabelCatalogNumber;
+            $trackData['releaseLabelName'] = $releaseLabelName;
+            $trackData['releaseCountry'] = $releaseCountry;
 
             // These items were available in the data from website but not in basic API endpoint
-            //$trackData['releaseCountry'] = $releaseCountry;
-            //$trackData['releaseLabelCatalogNumber'] = $releaseLabelCatalogNumber;
-            //$trackData['releaseLabelName'] = $releaseLabelName;
             //$trackData['releaseArtworkURL'] = $releaseImageRef; //Note : This seems to get blocked on the server by cloudflair (preventing external scraping/hosting)
 
             ////////////////////////////////////////////////////////////////////
@@ -222,7 +225,7 @@ class discogs_api_client {
         ////////////////////////////////////////////////////////////////////////
         // Dmup Output for debugging
         ////////////////////////////////////////////////////////////////////////
-        $dump_variables = False; // Extra switch for debugging control
+        $dump_variables = True; // Extra switch for debugging control
         if ($debug_output and $dump_variables) {
             echo '<h3>Variable Dumps (external_site_parser_discogs)</h3>' . "\n";
             echo '<h4>Track Array</h4>' . "\n";

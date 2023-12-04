@@ -184,11 +184,11 @@ if ($debug_output) {
                     $external_site_year_preference_checked_r = '';
                     if ($ex_manager->external_site_year_preference === 'R') {$external_site_year_preference_checked_r  = 'checked="checked"';}
 
-                    $external_site_LabelName_include_checked = ''; // Not in basic API
-                    //if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
+                    $external_site_LabelName_include_checked = '';
+                    if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
 
-                    $external_site_CatalogNumber_include_checked = ''; // Not in basic API
-                    //if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
+                    $external_site_CatalogNumber_include_checked = '';
+                    if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
 
                     // Title Strip Configuration
                     $title_s_checked = '';
@@ -420,14 +420,11 @@ if ($debug_output) {
 
             </p>
             <p>
-                <!-- Not available in basic API -->
-<!--
                 <label for="external_site_LabelName_include_id">Include Label Name</label>
                 <input type="checkbox" id="external_site_LabelName_include_id"     name="external_site_LabelName_include"     value="external_site_LabelName_include_t"     <?php echo $external_site_LabelName_include_checked; ?>>
                 <br>
                 <label for="external_site_CatalogNumber_include_id">Include Catalog Number</label>
                 <input type="checkbox" id="external_site_CatalogNumber_include_id" name="external_site_CatalogNumber_include" value="external_site_CatalogNumber_include_t" <?php echo $external_site_CatalogNumber_include_checked; ?>>
--->
             </p>
             <p>
                 <input type="submit" value="Submit">
@@ -497,6 +494,20 @@ for ($i = 1; $i <= 20; $i ++) {
             if(!is_null($trackData['releaseYear'])) {
                 if ($ex_manager->external_site_year_preference === 'L') { $row_left_bar = $trackData['releaseYear']; }
                 if ($ex_manager->external_site_year_preference === 'R') { $row_right_bar = $trackData['releaseYear']; }
+            }
+
+            // Release LabelName
+            if($ex_manager->external_site_LabelName_include
+               and !is_null($trackData['releaseLabelName'])
+              ) {
+                $row_publisher = $trackData['releaseLabelName'];
+            }
+
+            // Release CatalogNumber
+            if($ex_manager->external_site_CatalogNumber_include
+               and !is_null($trackData['releaseLabelCatalogNumber'])
+              ) {
+                $row_publisher_id = $trackData['releaseLabelCatalogNumber'];
             }
         }
 

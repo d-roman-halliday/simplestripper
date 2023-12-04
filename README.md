@@ -99,4 +99,6 @@ Some other implementations, and hosting of version 2.4 and below:
 * GraphicStripper v 0.0.2: http://www.pinballrebel.com/archive/other/onlinenew/index.html
 * SimpleStripper v 0.0.2: http://www.pinballrebel.com/archive/other/onlinestrips/index.html
 * Mikes Arcade: https://www.mikesarcade.com/arcade/titlestrips.html
-* Isolated Desert Compound (an awesome javascript form implementation, with templates for using a laser cutter): https://www.isolateddesertcompound.com/stripper/
+* Isolated Desert Compound (an awesome javascript form implementation, with templates for using a laser cutter):
+ * Implementation: https://www.isolateddesertcompound.com/stripper/
+ * Read about it: https://www.isolateddesertcompound.com/2015/12/07/jukebox-title-strip-creator/
