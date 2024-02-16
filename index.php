@@ -3,7 +3,7 @@
 // Setup & Config of page (main processing is set to happen in "debug output" area)
 ////////////////////////////////////////////////////////////////////////////////
 //Debugging Flag (so I can hide the ugly when not testing)
-$debug_output = True;
+$debug_output = False;
 
 require "titlestrip.php";
 require "external_site_parser.php";
