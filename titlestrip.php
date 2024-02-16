@@ -97,7 +97,7 @@ class titlestrip {
                 throw new Exception('File not exists/already deleted: '.$file_pointer);
             }
 
-            // Use unlink() function to delete a file (it returns false on error)
+            // Use unlink() function to delete a file (it returns False on error)
             if (!unlink($file_pointer)) {
                 //echo ("$file_pointer cannot be deleted due to an error");
                 throw new Exception('Failed to delete file: '.$file_pointer);
@@ -196,11 +196,13 @@ class titlestrip_manager {
     public $leftbar;
     public $rightbar;
     public $labeltype;
-    public $prelabel;
+    public $prelabel = False;
     public $artistBoxStyle;
 
-    public $artist_upper_case = false;
-    public $track_upper_case = false;
+    public $artist_upper_case = False;
+    public $track_upper_case = False;
+
+    public $ink_saver = False;
 
     // Array for title strips
     public $titlestrips = array();
@@ -225,14 +227,31 @@ class titlestrip_manager {
         $this->post_array_image_reference = $_POST['imagename'];
 
         // Non Array Variables
-        $this->titlesize = $_POST['titlesize'];
-        $this->titlefont = $_POST['titlefont'];
+        if(isset($_POST['prelabel'])) { $this->prelabel = (bool)trim($_POST['prelabel']);} // Any non empty value is True
+
         $this->framecolor = $_POST['framecolor'];
         $this->background = $_POST['background'];
         $this->backgroundcolor = $_POST['backgroundcolor'];
         $this->artistbackgroundcolor = $_POST['artistbackgroundcolor'];
 
-        // Fonts
+
+        $this->artistbgr = $_POST['artbackground'];
+        $this->leftbar = $_POST['leftbar'];
+        $this->rightbar = $_POST['rightbar'];
+        $this->labeltype = $_POST['labeltype'];
+
+
+        $this->artistBoxStyle = trim(stripslashes($_POST['artistBoxStyle']));
+        // Set default
+        if ($this->artistBoxStyle == "") {
+            $this->artistBoxStyle = 'arrows';
+        }
+
+        // Fonts & Styles
+        $this->titlesize = $_POST['titlesize'];
+        $this->titlefont = $_POST['titlefont'];
+
+
         $this->fontcolor = $_POST['fontcolor'];
 
         $this->fontbold = $_POST['fontbold'];
@@ -241,25 +260,22 @@ class titlestrip_manager {
 
         $this->font_style = $this->fontbold . $this->fontitalic . $this->fontunderline;
 
-
-        $this->artistbgr = $_POST['artbackground'];
-        $this->leftbar = $_POST['leftbar'];
-        $this->rightbar = $_POST['rightbar'];
-        $this->labeltype = $_POST['labeltype'];
-        $this->prelabel = $_POST['prelabel'];
-
-        $this->artistBoxStyle = trim(stripslashes($_POST['artistBoxStyle']));
-        #Set default
-        if ($this->artistBoxStyle == "") {
-            $this->artistBoxStyle = 'arrows';
-        }
-
         if(isset($_POST['artist_upper']) && $_POST['artist_upper'] == 'artist_upper_case') {
-            $this->artist_upper_case = true;
+            $this->artist_upper_case = True;
+        } else {
+            $this->artist_upper_case = False;
         }
 
         if(isset($_POST['track_upper']) && $_POST['track_upper'] == 'track_upper_case') {
-            $this->track_upper_case = true;
+            $this->track_upper_case = True;
+        } else {
+            $this->track_upper_case = False;
+        }
+
+        if(isset($_POST['ink_saver']) && $_POST['ink_saver'] == 'ink_saver') {
+            $this->ink_saver = True;
+        } else {
+            $this->ink_saver = False;
         }
 
     }
@@ -282,7 +298,7 @@ class titlestrip_manager {
                )
             {
                 //$check_message = 'Setting Image: '.$this->titlestrips[$i]->image_reference;
-                //error_log(print_r($check_message, TRUE));
+                //error_log(print_r($check_message, True));
 
                 $this->titlestrips[$i]->set_image_file_reference();
             }
@@ -291,7 +307,7 @@ class titlestrip_manager {
 
 }
 
-function &hex2rgb($hex, $asString = true)
+function &hex2rgb($hex, $asString = True)
 {
     // strip off any leading #
     if (0 === strpos($hex, '#')) {

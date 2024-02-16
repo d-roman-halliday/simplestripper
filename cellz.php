@@ -81,6 +81,25 @@ class SsFpdfExtended extends FPDF{
         // Craete text part
         if(trim($txt) != '')
         {
+            // FPDF has limitations of fonts and encoding
+            // If problems percist, I might need to switch to tFPDF: http://www.fpdf.org/?go=script&id=92
+
+            // Dirty hack: Replace a common problem character
+            //$txt = str_replace("’", "'", $txt);
+
+            // These didn't work Change encoding - Thin original strings from discogs are UTF-8
+            //$alternative_encoded_string = mb_convert_encoding($txt, 'ASCII', 'UTF-8');           // No
+            //$alternative_encoded_string = mb_convert_encoding($txt, 'ISO-8859-1', 'UTF-8');      // No
+            //$alternative_encoded_string = mb_convert_encoding($txt, 'ASCII//TRANSLIT', 'UTF-8'); // No
+            //$alternative_encoded_string = mb_convert_encoding($txt,  'windows-1252', 'UTF-8');   // Yes
+
+            // replace Microsoft Word version of single  and double quotations marks (“ ” ‘ ’) with  regular quotes (' and ")
+            //$alternative_encoded_string = iconv('UTF-8', 'ASCII//TRANSLIT', $txt); // Yes
+            // From FAQ: Don't use UTF-8 with the standard fonts; they expect text encoded in windows-1252
+            $alternative_encoded_string = iconv('UTF-8', 'windows-1252', $txt);      // Yes
+
+            $txt = $alternative_encoded_string;
+
             // CellZ: Scale text (if string is too long for box)
             $txt_scale = 100.0;
             $str_width = $this -> GetStringWidth($txt);

@@ -3,7 +3,7 @@
 // Setup & Config of page (main processing is set to happen in "debug output" area)
 ////////////////////////////////////////////////////////////////////////////////
 //Debugging Flag (so I can hide the ugly when not testing)
-$debug_output = false;
+$debug_output = False;
 
 require "titlestrip.php";
 require "external_site_parser.php";
@@ -157,13 +157,22 @@ if ($debug_output) {
                     $ex_manager = new external_site_manager;
 
                     ////////////////////////////////////////////////////////////
-                    // Form default values management
+                    // Form default values management (If no POST, this is a first load of this page)
+                    ////////////////////////////////////////////////////////////
+                    if ( $_SERVER['REQUEST_METHOD'] != 'POST') {
+                        $ts_manager->fontbold = True;
+                        $ts_manager->artist_upper_case = True;
+                        $ts_manager->track_upper_case = True;
+                    }
+
+                    ////////////////////////////////////////////////////////////
+                    // Form default values management (From Objects)
                     ////////////////////////////////////////////////////////////
 
                     // External Site Configuration
                     $external_site_release_artist_preference_checked_t = 'checked="checked"';
                     $external_site_release_artist_preference_checked_r = '';
-                    if (isset($discogs_artist_pref) and $discogs_artist_pref == "R") {
+                    if (isset($ex_manager->external_site_release_artist_preference) and $ex_manager->external_site_release_artist_preference == "R") {
                         $external_site_release_artist_preference_checked_t = '';
                         $external_site_release_artist_preference_checked_r = 'checked="checked"';
                     }
@@ -175,19 +184,41 @@ if ($debug_output) {
                     $external_site_year_preference_checked_r = '';
                     if ($ex_manager->external_site_year_preference === 'R') {$external_site_year_preference_checked_r  = 'checked="checked"';}
 
-                    $external_site_LabelName_include_checked = ''; // Not in basic API
-                    //if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
+                    $external_site_LabelName_include_checked = '';
+                    if ($ex_manager->external_site_LabelName_include) {$external_site_LabelName_include_checked  = 'checked="checked"';}
 
-                    $external_site_CatalogNumber_include_checked = ''; // Not in basic API
-                    //if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
+                    $external_site_CatalogNumber_include_checked = '';
+                    if ($ex_manager->external_site_CatalogNumber_include) {$external_site_CatalogNumber_include_checked  = 'checked="checked"';}
 
                     // Title Strip Configuration
+                    $title_s_checked = '';
+                    $title_m_checked = '';
+                    $title_l_checked = '';
+                    if ($ts_manager->titlesize == 'small') {
+                        $title_s_checked = 'checked="checked"';
+                    }
+                    elseif ($ts_manager->titlesize == 'large') {
+                        $title_l_checked = 'checked="checked"';
+                    } else { // Default value
+                        $title_m_checked = 'checked="checked"';
+                    }
+
+                    $fontbold_id_checked = '';
+                    if ($ts_manager->fontbold) {$fontbold_id_checked = 'checked="checked"';}
+                    $fontitalic_id_checked = '';
+                    if ($ts_manager->fontitalic) {$fontitalic_id_checked = 'checked="checked"';}
+                    $fontunderline_id_checked = '';
+                    if ($ts_manager->fontunderline) {$fontunderline_id_checked = 'checked="checked"';}
                     $artist_upper_id_checked = '';
                     if ($ts_manager->artist_upper_case) {$artist_upper_id_checked = 'checked="checked"';}
 
                     $track_upper_id_checked = '';
                     if ($ts_manager->track_upper_case) {$track_upper_id_checked  = 'checked="checked"';}
 
+                    $ink_saver_id_checked = '';
+                    if ($ts_manager->ink_saver) {$ink_saver_id_checked  = 'checked="checked"';}
+                    $prelabel_id_checked = '';
+                    if ($ts_manager->prelabel) {$prelabel_id_checked  = 'checked="checked"';}
 
                     ////////////////////////////////////////////////////////////
                     // Request data from External URL (discogs)
@@ -389,14 +420,11 @@ if ($debug_output) {
 
             </p>
             <p>
-                <!-- Not available in basic API -->
-<!--
                 <label for="external_site_LabelName_include_id">Include Label Name</label>
                 <input type="checkbox" id="external_site_LabelName_include_id"     name="external_site_LabelName_include"     value="external_site_LabelName_include_t"     <?php echo $external_site_LabelName_include_checked; ?>>
                 <br>
                 <label for="external_site_CatalogNumber_include_id">Include Catalog Number</label>
                 <input type="checkbox" id="external_site_CatalogNumber_include_id" name="external_site_CatalogNumber_include" value="external_site_CatalogNumber_include_t" <?php echo $external_site_CatalogNumber_include_checked; ?>>
--->
             </p>
             <p>
                 <input type="submit" value="Submit">
@@ -467,6 +495,20 @@ for ($i = 1; $i <= 20; $i ++) {
                 if ($ex_manager->external_site_year_preference === 'L') { $row_left_bar = $trackData['releaseYear']; }
                 if ($ex_manager->external_site_year_preference === 'R') { $row_right_bar = $trackData['releaseYear']; }
             }
+
+            // Release LabelName
+            if($ex_manager->external_site_LabelName_include
+               and !is_null($trackData['releaseLabelName'])
+              ) {
+                $row_publisher = $trackData['releaseLabelName'];
+            }
+
+            // Release CatalogNumber
+            if($ex_manager->external_site_CatalogNumber_include
+               and !is_null($trackData['releaseLabelCatalogNumber'])
+              ) {
+                $row_publisher_id = $trackData['releaseLabelCatalogNumber'];
+            }
         }
 
         // Artist/Trak B
@@ -525,7 +567,12 @@ for ($i = 1; $i <= 20; $i ++) {
 
             <h3>Strip Output Settings</h3>
             <p>Don't change these until finished importing from discogs as they reset when fetching the data.</p>
-
+            <h4>
+                Image or Text
+            </h4>
+            <input id="labeltype_t" type="radio" name="labeltype" value="text" checked="checked" ><label for="labeltype_t">TEXT</label>
+            <br>
+            <input id="labeltype_i" type="radio" name="labeltype" value="image"                  ><label for="labeltype_i">IMAGE</label>
             <h4>
                 Frame Color
             </h4>
@@ -536,59 +583,21 @@ for ($i = 1; $i <= 20; $i ++) {
             <h4>
                 Background
             </h4>
-            <input id="background_y" type="radio" name="background" value="TRUE"              ><label for="background_y">Yes</label><br>
-            <input id="background_n" type="radio" name="background" value="" checked="checked"><label for="background_n">No</label><br>
+            <input id="background_y" type="radio" name="background" value="TRUE"              ><label for="background_y">Yes</label
+            ><br>
+            <input id="background_n" type="radio" name="background" value="" checked="checked"><label for="background_n">No</label>
+            <br>
             <label for="bgcolor_p">Select color:</label>
             <input id="bgcolor_p" name="backgroundcolor" class="color" value="FFC0CB">
             <h4>
                 Artist Background
             </h4>
-            <input id="artbackground_y" type="radio" name="artbackground" value="TRUE"               ><label for="artbackground_y">Yes</label><br>
-            <input id="artbackground_n" type="radio" name="artbackground" value="" checked="checked" ><label for="artbackground_n">No</label><br>
+            <input id="artbackground_y" type="radio" name="artbackground" value="TRUE"               ><label for="artbackground_y">Yes</label>
+            <br>
+            <input id="artbackground_n" type="radio" name="artbackground" value="" checked="checked" ><label for="artbackground_n">No</label>
+            <br>
             <label for="artistbackgroundcolor_p">Select color:</label>
             <input id="artistbackgroundcolor_p" name="artistbackgroundcolor" class="color" value="FFC0CB" >
-            <h4>
-                Font
-            </h4>
-            <input id="font_01" type="radio" name="titlefont" value="Times"                      ><label for="font_01">Times</label><br>
-            <input id="font_02" type="radio" name="titlefont" value="Helvetica" checked="checked"><label for="font_02">Helvetica</label><br>
-            <input id="font_03" type="radio" name="titlefont" value="Courier"                    ><label for="font_03">Courier</label>
-            <h4>
-                Font Color
-            </h4>
-            <label for="fontcolor_p">Select color:</label>
-            <input id="fontcolor_p" name="fontcolor" class="color" value="000000" >
-            <h4>
-                Print Size
-            </h4>
-            <input id="title_s" type="radio" name="titlesize" value="small"                    ><label for="title_s">Small</label><br>
-            <input id="title_m" type="radio" name="titlesize" value="medium" checked="checked" ><label for="title_m">Medium</label><br>
-            <input id="title_l" type="radio" name="titlesize" value="large"                    ><label for="title_l">Large</label><br>
-            <h4>
-                Bold
-            </h4>
-            <input id="fontbold_y" type="radio" name="fontbold" value="B"                  ><label for="fontbold_y">Yes</label><br>
-            <input id="fontbold_n" type="radio" name="fontbold" value="" checked="checked" ><label for="fontbold_n">No</label><br>
-            <h4>
-                Italic
-            </h4>
-            <input id="fontitalic_y" type="radio" name="fontitalic" value="I"                  ><label for="fontitalic_y">Yes</label><br>
-            <input id="fontitalic_n" type="radio" name="fontitalic" value="" checked="checked" ><label for="fontitalic_n">No</label>
-            <h4>
-                Underlined
-            </h4>
-            <input id="fontunderline_y" type="radio" name="fontunderline" value="U"                  ><label for="fontunderline_y">Yes</label><br>
-            <input id="fontunderline_n" type="radio" name="fontunderline" value="" checked="checked" ><label for="fontunderline_n">No</label>
-            <h4>
-                Image or Text
-            </h4>
-            <input id="labeltype_t" type="radio" name="labeltype" value="text" checked="checked" ><label for="labeltype_t">TEXT</label><br>
-            <input id="labeltype_i" type="radio" name="labeltype" value="image"                  ><label for="labeltype_i">IMAGE</label>
-            <h4>
-                Pre Printed Labels
-            </h4>
-            <input id="prelabel_y" type="radio" name="prelabel" value="Y"                  ><label for="prelabel_y">Yes</label><br>
-            <input id="prelabel_n" type="radio" name="prelabel" value="" checked="checked" ><label for="prelabel_n">No</label>
             <h4>
                 Artist Box
             </h4>
@@ -601,21 +610,68 @@ for ($i = 1; $i <= 20; $i ++) {
                 </select>
             </p>
             <h4>
-                Text settings
+                Font
             </h4>
-            <p>
-                <label for="artist_upper_id">Convert all artist names to upper case</label>
-                <input type="checkbox" id="artist_upper_id" name="artist_upper" value="artist_upper_case" <?php echo $artist_upper_id_checked ?>>
-                <br>
-                <label for="track_upper_id">Convert all track names to upper case</label>
-                <input type="checkbox" id="track_upper_id"  name="track_upper"  value="track_upper_case"  <?php echo $track_upper_id_checked ?>>
-            </p>
-            <p>
+            <input id="font_01" type="radio" name="titlefont" value="Times"                      ><label for="font_01">Times</label><br>
+            <input id="font_02" type="radio" name="titlefont" value="Helvetica" checked="checked"><label for="font_02">Helvetica</label><br>
+            <input id="font_03" type="radio" name="titlefont" value="Courier"                    ><label for="font_03">Courier</label>
+            <h4>
+                Font Color
+            </h4>
+            <label for="fontcolor_p">Select color:</label>
+            <input id="fontcolor_p" name="fontcolor" class="color" value="000000" >
+            <h4>
+                Font Size
+            </h4>
+            <div class="form-check form-check-inline">
+                <label for="title_s" class="form-check-label" >Small</label>
+                <input id="title_s"  class="form-check-input" type="radio" name="titlesize" value="small" <?php echo $title_s_checked ?>>
+            </div>
+            <div class="form-check form-check-inline">
+                <label for="title_m" class="form-check-label" >Medium</label>
+                <input id="title_m"  class="form-check-input" type="radio" name="titlesize" value="medium" <?php echo $title_m_checked ?>>
+            </div>
+            <div class="form-check form-check-inline">
+                <label for="title_l" class="form-check-label" >Large</label>
+                <input id="title_l"  class="form-check-input" type="radio" name="titlesize" value="large" <?php echo $title_l_checked ?>>
+            </div>
+            <h4>
+                Text General
+            </h4>
+            <div class="form-check form-switch">
+                <label for="fontbold_id" class="form-check-label" >Bold</label>
+                <input id="fontbold_id"  class="form-check-input" type="checkbox" role="switch" name="fontbold" value="B" <?php echo $fontbold_id_checked ?>>
+            </div>
+            <div class="form-check form-switch">
+                <label for="fontitalic_id" class="form-check-label" >Italic</label>
+                <input id="fontitalic_id"  class="form-check-input" type="checkbox" role="switch" name="fontitalic" value="I" <?php echo $fontitalic_id_checked ?>>
+            </div>
+            <div class="form-check form-switch">
+                <label for="fontunderline_id" class="form-check-label" >Underlined</label>
+                <input id="fontunderline_id"  class="form-check-input" type="checkbox" role="switch" name="fontunderline" value="U" <?php echo $fontunderline_id_checked ?>>
+            </div>
+            <div class="form-check form-switch">
+                <label for="artist_upper_id" class="form-check-label" >Convert all artist names to upper case</label>
+                <input id="artist_upper_id"  class="form-check-input" type="checkbox" role="switch" name="artist_upper" value="artist_upper_case" <?php echo $track_upper_id_checked ?>>
+            </div>
+            <div class="form-check form-switch">
+                <label for="track_upper_id" class="form-check-label" >Convert all track names to upper case</label>
+                <input id="track_upper_id"  class="form-check-input" type="checkbox" role="switch" name="track_upper" value="track_upper_case" <?php echo $artist_upper_id_checked ?>>
+            </div>
+            <h4>
+                Output Settings
+            </h4>
+            <div class="form-check form-switch">
+                <label for="ink_saver_id" class="form-check-label" >Ink Saver (don't print empty boxes)</label>
+                <input id="ink_saver_id"  class="form-check-input" type="checkbox" role="switch" name="ink_saver" value="ink_saver" <?php echo $ink_saver_id_checked ?>>
+            </div>
+            <div class="form-check form-switch">
+                <label for="prelabel_id" class="form-check-label">Pre Printed Labels (don't print outlines and boxes)</label>
+                <input id="prelabel_id"  class="form-check-input" type="checkbox" role="switch" name="prelabel" value="prelabel" <?php echo $prelabel_id_checked ?>>
+            </div>
                 <!--  Reset doesn't work if form is already populated at start, javascript could help -->
                 <!-- <button name="Reset"  type="reset">Clear All Fields</button>-->
                 <button name="Submit" type="submit" formaction="printstrips.php" formtarget="_blank">Create PDF</button>
-            </p>
-
         </form>
         </div>
     </body>

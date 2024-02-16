@@ -4,8 +4,8 @@ class external_site_manager {
     public $external_site_url;
     public $external_site_release_artist_preference = 'T'; // R = Release ¦ T = Track
     public $external_site_year_preference = 'N';
-    public $external_site_LabelName_include = false;
-    public $external_site_CatalogNumber_include = false;
+    public $external_site_LabelName_include = False;
+    public $external_site_CatalogNumber_include = False;
 
     // Keeping this for refernce but it's not active as the site protection for discogs blocks it
     public $external_site_image_preference;
@@ -23,10 +23,10 @@ class external_site_manager {
         $this->external_site_year_preference = trim(stripslashes($_POST['external_site_year_preference']));
 
         if(isset($_POST['external_site_LabelName_include']) && $_POST['external_site_LabelName_include'] == 'external_site_LabelName_include_t') {
-            $this->external_site_LabelName_include = true;
+            $this->external_site_LabelName_include = True;
         }
         if(isset($_POST['external_site_CatalogNumber_include']) && $_POST['external_site_CatalogNumber_include'] == 'external_site_CatalogNumber_include_t') {
-            $this->external_site_CatalogNumber_include = true;
+            $this->external_site_CatalogNumber_include = True;
         }
     }
 }
@@ -124,7 +124,7 @@ class discogs_api_client {
         curl_setopt($ch, CURLOPT_USERAGENT, $this->user_agent);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return the result from the request rather than dumping it out (and returning the status)
-        
+
         if ($this->api_client_AuthConfigured == True) {
             ////////////////////////////////////////////////////////////////////
             // API Authentication information
@@ -147,10 +147,13 @@ class discogs_api_client {
         // Release level data
         $releaseYear = $api_responce->year;
         $releaseArtistName = $api_responce->artists[0]->name;
+        $releaseLabelName = $api_responce->labels[0]->name;
+        $releaseLabelCatalogNumber = $api_responce->labels[0]->catno;
+        $releaseCountry = $api_responce->country;
 
         ////////////////////////////////////////////////////////////////////////
         // Track level
-        if ($debug_output) { echo "<h3>Track Dta</h3><p>"; }
+        if ($debug_output) { echo "<h3>Track Data</h3><p>"; }
 
         foreach ($api_responce->tracklist as $item) {
             ////////////////////////////////////////////////////////////////////
@@ -167,11 +170,11 @@ class discogs_api_client {
 
             $trackData['releaseArtist'] = $releaseArtistName;
             $trackData['releaseYear'] = $releaseYear;
+            $trackData['releaseLabelCatalogNumber'] = $releaseLabelCatalogNumber;
+            $trackData['releaseLabelName'] = $releaseLabelName;
+            $trackData['releaseCountry'] = $releaseCountry;
 
             // These items were available in the data from website but not in basic API endpoint
-            //$trackData['releaseCountry'] = $releaseCountry;
-            //$trackData['releaseLabelCatalogNumber'] = $releaseLabelCatalogNumber;
-            //$trackData['releaseLabelName'] = $releaseLabelName;
             //$trackData['releaseArtworkURL'] = $releaseImageRef; //Note : This seems to get blocked on the server by cloudflair (preventing external scraping/hosting)
 
             ////////////////////////////////////////////////////////////////////
@@ -201,8 +204,8 @@ class discogs_api_client {
 
             ////////////////////////////////////////////////////////////////////
             // strip a trailing number in brackets (for artists where there are more than one with the same name)
-            if (    (strpos($trackData['displayArtist'], '(') !== false) //str_contains() is a PHP8 new function
-                and (strpos($trackData['displayArtist'], ')') !== false)
+            if (    (strpos($trackData['displayArtist'], '(') !== False) //str_contains() is a PHP8 new function
+                and (strpos($trackData['displayArtist'], ')') !== False)
                ) {
                 $trackData['displayArtist'] = trim(preg_replace('/\([0-9]*\)$/i', '', $trackData['displayArtist']));
             }
@@ -222,7 +225,7 @@ class discogs_api_client {
         ////////////////////////////////////////////////////////////////////////
         // Dmup Output for debugging
         ////////////////////////////////////////////////////////////////////////
-        $dump_variables = False; // Extra switch for debugging control
+        $dump_variables = True; // Extra switch for debugging control
         if ($debug_output and $dump_variables) {
             echo '<h3>Variable Dumps (external_site_parser_discogs)</h3>' . "\n";
             echo '<h4>Track Array</h4>' . "\n";
@@ -300,7 +303,7 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
         ////////////////////////////////////////////////////////////////////////////
         // Instantiate The DOMDocument Class
         $htmlDom = new DOMDocument();
-        $htmlDom->validateOnParse = true;
+        $htmlDom->validateOnParse = True;
 
         // Parse the HTML of the page using DOMDocument::loadHTML In UTF8 Encoding
         // @$htmlDom->loadHTML($webPageContent);
@@ -525,8 +528,8 @@ function external_site_parser_discogs ($discogs_url, $discogs_artist_pref, $debu
             }
 
             // strip a trailing number in brackets (for artists where there are more than one with the same name)
-            if (    (strpos($trackData['displayArtist'], '(') !== false) //str_contains() is a PHP8 new function
-                and (strpos($trackData['displayArtist'], ')') !== false)
+            if (    (strpos($trackData['displayArtist'], '(') !== False) //str_contains() is a PHP8 new function
+                and (strpos($trackData['displayArtist'], ')') !== False)
                ) {
                 $trackData['displayArtist'] = trim(preg_replace('/\([0-9]*\)$/i', '', $trackData['displayArtist']));
             }
