@@ -1,0 +1,4 @@
+see: http://www.fpdf.org/makefont/index.php
+and: http://www.fpdf.org/en/tutorial/tuto7.htm
+
+place fonts under fpdf/font

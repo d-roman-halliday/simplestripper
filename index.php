@@ -3,7 +3,7 @@
 // Setup & Config of page (main processing is set to happen in "debug output" area)
 ////////////////////////////////////////////////////////////////////////////////
 //Debugging Flag (so I can hide the ugly when not testing)
-$debug_output = False;
+$debug_output = True;
 
 require "titlestrip.php";
 require "external_site_parser.php";
@@ -279,6 +279,7 @@ if ($debug_output) {
                 <!-- <button type="button" id="button1_sh_ab" class="btn btn-secondary" onclick="changeVisOffSelected('ab')">Hide Artist B Column</button> -->
 
                 <button type="button" id="button1_sh_pb" class="btn btn-secondary" onclick="changeVisOnPublishers()">Show Publisher Columns</button>
+                <button type="button" id="button1_sh_af" class="btn btn-secondary" onclick="changeVisOffSelected('af')">Hide Artist Font Column</button>
 
                 <button type="button" id="button1_sh_lb" class="btn btn-secondary" onclick="changeVisOffSelected('lb')">Hide Left Bar Column</button>
                 <button type="button" id="button1_sh_rb" class="btn btn-secondary" onclick="changeVisOffSelected('rb')">Hide Right Bar Column</button>
@@ -441,6 +442,7 @@ if ($debug_output) {
                         <td id="tb_tr_0" style="vertical-align: top; font-weight: bold;">Title B</td>
                         <td id="aa_tr_0" style="vertical-align: top; font-weight: bold;">Artist A</td>
                         <td id="ab_tr_0" style="vertical-align: top; font-weight: bold;">Artist B</td>
+                        <td id="af_tr_0" style="vertical-align: top; font-weight: bold;">Artist Font</td>
                         <td id="p1_tr_0" style="vertical-align: top; font-weight: bold; display:none">Publisher</td>
                         <td id="p2_tr_0" style="vertical-align: top; font-weight: bold; display:none">Publisher ID</td>
                         <td id="lb_tr_0" style="vertical-align: top; font-weight: bold;">Left Bar</td>
@@ -461,6 +463,7 @@ for ($i = 1; $i <= 20; $i ++) {
     $row_publisher = '';
     $row_publisher_id = '';
     $row_image = '';
+    $row_artist_font = '';
 
     $row_already_populated = False;
     if (   isset($ts_manager)
@@ -481,6 +484,7 @@ for ($i = 1; $i <= 20; $i ++) {
         $row_publisher = $ts_manager->titlestrips[$i]->publisher;
         $row_publisher_id = $ts_manager->titlestrips[$i]->publisher_id;
         $row_image = $ts_manager->titlestrips[$i]->image_reference;
+        $row_artist_font = $ts_manager->titlestrips[$i]->artist_font;
 
     } else {
 
@@ -523,6 +527,21 @@ for ($i = 1; $i <= 20; $i ++) {
             $row_artist_b = '';
         }
 
+        ////////////////////////////////////////////////////////////////////
+        //Hack for artist fonts (set by artist name)
+        //'metal_lord' => 'Metal Lord',
+        //'pastor_of_muppets' => 'Pastor Of Muppets'
+        if (isset($row_artist_a)
+           ) {
+            if(strtolower($row_artist_a) == strtolower('Iron Maiden')) {
+                $row_artist_font = 'metal_lord';
+            }
+            // Comes out looking poor
+            //if(strtolower($row_artist_a) == strtolower('Metallica')) {
+            //    $row_artist_font = 'pastor_of_muppets';
+            //}
+        }
+
     }
 
     //Clean up HTML display characters...
@@ -535,7 +554,9 @@ for ($i = 1; $i <= 20; $i ++) {
     $row_publisher = htmlentities($row_publisher);
     $row_publisher_id = htmlentities($row_publisher_id);
 
-    //$row_image = htmlentities($row_image); // Not needed
+    // Not needed
+    //$row_image = htmlentities($row_image);
+    $row_artist_font = htmlentities($row_artist_font);
 
     echo '                    <tr>'."\n";
     echo '                        <td id="rn_tr_'.$i.'" text-align: right; font-weight: bold;">'.$i.'</td>'."\n";
@@ -543,16 +564,28 @@ for ($i = 1; $i <= 20; $i ++) {
     echo '                        <td id="tb_tr_'.$i.'">                     <input name="titleb['.$i.']"      value="'.$row_track_b.'"></td>'."\n";
     echo '                        <td id="aa_tr_'.$i.'">                     <input name="artista['.$i.']"     value="'.$row_artist_a.'"></td>'."\n";
     echo '                        <td id="ab_tr_'.$i.'">                     <input name="artistb['.$i.']"     value="'.$row_artist_b.'"></td>'."\n";
+    echo '                        <td id="ab_tr_'.$i.'">                     <input name="artistfont['.$i.']"  value="'.$row_artist_font.'"></td>'."\n";
+    //echo '                        <td id="af_tr_'.$i.'">';
+    //echo '<select id="af_'.$i.'"      name="artistfont['.$i.']">';
+    //echo '  <option ''value="">None</option>';
+    //echo '  <option value="Times">Times</option>';
+    //echo '  <option value="Helvetica">Helvetica</option>';
+    //echo '  <option value="Courier">Courier</option>';
+    //echo '  <option value="metal_lord">Metal Lord</option>';
+    //echo '  <option value="pastor_of_muppets">Pastor Of Muppets</option>';
+    //echo '</select>'."\n";
     echo '                        <td id="p1_tr_'.$i.'" style="display:none"><input name="publisher['.$i.']"   value="'.$row_publisher.'"></td>'."\n";
     echo '                        <td id="p2_tr_'.$i.'" style="display:none"><input name="publisherid['.$i.']" value="'.$row_publisher_id.'"></td>'."\n";
     echo '                        <td id="lb_tr_'.$i.'">                     <input name="leftbar['.$i.']"     value="'.$row_left_bar.'"></td>'."\n";
     echo '                        <td id="rb_tr_'.$i.'">                     <input name="rightbar['.$i.']"    value="'.$row_right_bar.'"></td>'."\n";
-    echo '                        <td id="im_tr_'.$i.'"><select id="img_in_'.$i.'"  name="imagename['.$i.']">';
-    echo '<option value="">None</option>';
-    echo '<option value="images/wreath.jpg">Wreath</option>';
-    echo '<option value="images/santa.jpg">Santa</option>';
-    echo '<option value="images/jukebox.jpg">Jukebox</option>';
-    echo '<option value="images/rickynelson.jpg">Ricky Nelson</option>';
+    echo '                        <td id="im_tr_'.$i.'">';
+    echo '<select id="img_in_'.$i.'"  name="imagename['.$i.']">';
+    echo '  <option value="">None</option>';
+    echo '  <option value="images/wreath.jpg">Wreath</option>';
+    echo '  <option value="images/santa.jpg">Santa</option>';
+    echo '  <option value="images/jukebox.jpg">Jukebox</option>';
+    echo '  <option value="images/rickynelson.jpg">Ricky Nelson</option>';
+    echo '  <option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
     echo '<option value="images/beachboys1.jpg">Beach Boys Picture 1</option>';
     echo '</select>'."\n";
     echo '                        </td>'."\n";

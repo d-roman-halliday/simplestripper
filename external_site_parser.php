@@ -162,7 +162,8 @@ class discogs_api_client {
             $trackData['trackPosition'] = $item->position;
 
             $trackData['trackArtist'] = '';
-            if (   !is_null($item->artists)
+            if (   isset($item->artists)
+                && !is_null($item->artists)
                 && is_array($item->artists)
                 && isset($item->artists[0]) ) {
                 $trackData['trackArtist'] = $item->artists[0]->name; // always first item in array (if exists)

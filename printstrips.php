@@ -30,6 +30,11 @@ $ts_manager = new titlestrip_manager;
 //
 // start building pdf
 $pdf = new SsFpdfExtended('P', 'pt', 'Letter'); // Imported from cellz.php containing an extended version of FPDF
+
+//Fonts (lazy adding fo rnow)
+$pdf->AddFont('metal_lord','','metal_lord.php');
+$pdf->AddFont('pastor_of_muppets','','pastor_of_muppets.php');
+
 $pdftitle = 'Jukebox Title Strips';
 $author = 'Simple Stripper Version 3.1 Modified by David Roman-Halliday';
 
@@ -340,6 +345,17 @@ switch ($ts_manager->labeltype) {
                 // /Start Print The Artists, Publisher and Publisher ID
                 // ####################################################
 
+
+                /////////////////////////////////////////////////
+                //Manage font (dirty for now, as custom fonts don't have bold)
+
+                $artist_font = $ts_manager->titlestrips[$recordtoprint]->artist_font;
+                if (in_array($artist_font, ["metal_lord", "pastor_of_muppets"])) {
+                    $pdf->SetFont($artist_font, '', $fontsize);
+                }
+
+                /////////////////////////////////////////////////
+                // Print Artist
                 $pdf->SetXY(44 + $horiz * 288, 54 + $vert * 72);
                 $pdf->CellZ(156, 0, $combinedartist, '', '', 'C');
 

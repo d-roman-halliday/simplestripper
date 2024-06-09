@@ -12,6 +12,7 @@ class titlestrip {
     public $publisher;
     public $publisher_id;
     public $image_reference;
+    public $artist_font;
 
     // Variables used for control and management
     public $image_file_reference;
@@ -179,6 +180,7 @@ class titlestrip_manager {
     protected $post_array_publisher;
     protected $post_array_publisher_id;
     protected $post_array_image_reference;
+    protected $post_array_artist_font;
 
     // Non Array Variables
     public $titlesize;
@@ -225,6 +227,7 @@ class titlestrip_manager {
         $this->post_array_publisher = $_POST['publisher'];
         $this->post_array_publisher_id = $_POST['publisherid'];
         $this->post_array_image_reference = $_POST['imagename'];
+        $this->post_array_artist_font = $_POST['artistfont'];
 
         // Non Array Variables
         if(isset($_POST['prelabel'])) { $this->prelabel = (bool)trim($_POST['prelabel']);} // Any non empty value is True
@@ -255,8 +258,18 @@ class titlestrip_manager {
         $this->fontcolor = $_POST['fontcolor'];
 
         $this->fontbold = $_POST['fontbold'];
-        $this->fontitalic = $_POST['fontitalic'];
-        $this->fontunderline = $_POST['fontunderline'];
+
+        if(isset($_POST['fontitalic'])) {
+            $this->fontitalic = $_POST['fontitalic'];
+        } else {
+            $this->fontitalic = "";
+        }
+
+        if(isset($_POST['fontunderline'])) {
+            $this->fontunderline = $_POST['fontunderline'];
+        } else {
+            $this->fontunderline = "";
+        }
 
         $this->font_style = $this->fontbold . $this->fontitalic . $this->fontunderline;
 
@@ -292,6 +305,7 @@ class titlestrip_manager {
             $this->titlestrips[$i]->publisher = trim(stripslashes($this->post_array_publisher[$i]));
             $this->titlestrips[$i]->publisher_id = trim(stripslashes($this->post_array_publisher_id[$i]));
             $this->titlestrips[$i]->image_reference = trim(stripslashes($this->post_array_image_reference[$i]));
+            $this->titlestrips[$i]->artist_font = trim(stripslashes($this->post_array_artist_font[$i]));
 
             if (    isset($this->titlestrips[$i]->image_reference)
                 and strlen($this->titlestrips[$i]->image_reference) > 0
@@ -302,6 +316,7 @@ class titlestrip_manager {
 
                 $this->titlestrips[$i]->set_image_file_reference();
             }
+
         }
     }
 
