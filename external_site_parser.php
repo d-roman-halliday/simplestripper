@@ -147,9 +147,28 @@ class discogs_api_client {
         // Release level data
         $releaseYear = $api_responce->year;
         $releaseArtistName = $api_responce->artists[0]->name;
-        $releaseLabelName = $api_responce->labels[0]->name;
-        $releaseLabelCatalogNumber = $api_responce->labels[0]->catno;
-        $releaseCountry = $api_responce->country;
+        
+        // Not always set in API Responce - May be a requirement to get details from a discogs 'release' rather than a 'master'.
+        if (   isset($api_responce->labels)
+            && !is_null($api_responce->labels)
+            && is_array($api_responce->labels)
+            && isset($api_responce->labels[0])
+            ) {                    
+            $releaseLabelName = $api_responce->labels[0]->name; // always first item in array (if exists)
+            $releaseLabelCatalogNumber = $api_responce->labels[0]->catno;
+        } else {
+            $releaseLabelName = NULL;
+            $releaseLabelCatalogNumber = NULL;
+        }
+        
+        if (   isset($api_responce->country)
+            && !is_null($api_responce->country)
+            ) {                    
+            $releaseCountry = $api_responce->country;
+        } else {
+            $releaseCountry = NULL;
+        }
+        
 
         ////////////////////////////////////////////////////////////////////////
         // Track level
@@ -162,7 +181,8 @@ class discogs_api_client {
             $trackData['trackPosition'] = $item->position;
 
             $trackData['trackArtist'] = '';
-            if (   !is_null($item->artists)
+            if (   isset($item->artists)
+                && !is_null($item->artists)
                 && is_array($item->artists)
                 && isset($item->artists[0]) ) {
                 $trackData['trackArtist'] = $item->artists[0]->name; // always first item in array (if exists)
