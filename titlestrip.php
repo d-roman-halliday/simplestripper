@@ -251,12 +251,23 @@ class titlestrip_manager {
         $this->titlesize = $_POST['titlesize'];
         $this->titlefont = $_POST['titlefont'];
 
-
         $this->fontcolor = $_POST['fontcolor'];
 
-        $this->fontbold = $_POST['fontbold'];
-        $this->fontitalic = $_POST['fontitalic'];
-        $this->fontunderline = $_POST['fontunderline'];
+        if(isset($_POST['fontbold']) && $_POST['fontbold'] == 'B') {
+            $this->fontbold = 'B';
+        } else {
+            $this->fontbold = '';
+        }
+        if(isset($_POST['fontitalic']) && $_POST['fontitalic'] == 'I') {
+            $this->fontitalic = 'I';
+        } else {
+            $this->fontitalic = '';
+        }
+        if(isset($_POST['fontunderline']) && $_POST['fontunderline'] == 'U') {
+            $this->fontunderline = 'U';
+        } else {
+            $this->fontunderline = '';
+        }
 
         $this->font_style = $this->fontbold . $this->fontitalic . $this->fontunderline;
 
