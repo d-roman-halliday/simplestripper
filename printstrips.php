@@ -3,10 +3,10 @@
 /**
  *
  * @version $Id$
- * @copyright 2023
+ * @copyright 2024
  */
 
-// Please note that this version has been tweaked by David Roman-Halliday (adding new functionality)
+// This version has been reworked by David Roman-Halliday (adding new functionality)
 // Peviously modified to work in the new php where global variables are not allowed by Stephen Rice at n4yza.com and you can contact him on that web site.
 // Originally written by George Howell
 
@@ -101,6 +101,146 @@ if ($ts_manager->background) {
 // End Paint the Background Routine
 // #########################################
 
+// #########################################
+// Start Strip Printer Class
+// #########################################
+
+class strip_printer {
+
+    // ########################################################################
+    // Define Constants & Configurations
+    // ########################################################################
+    //Original code to draw lines from top left to top right, then bottom left to bottom right:
+    //$pdf->Line(18 + $horiz * 288, 22 + $vert * 72, 234 + $horiz * 288, 22 + $vert * 72);
+    //$pdf->Line(18 + $horiz * 288, 90 + $vert * 72, 234 + $horiz * 288, 90 + $vert * 72);
+    private $base_margin_left = 18; // Taken from original script
+    private $base_margin_top = 22;  // Taken from original script
+
+    private $base_column_offset = 288;
+    private $base_row_offset = 72;
+
+    private $box_width = 216; // 234 - 18
+    private $box_height = 68; //  90 - 22
+
+    // ########################################################################
+    // Define constants & Configurations
+    // ########################################################################
+    public $strip_number = -1;
+    public $strip_number_column = -1;
+    public $strip_number_row = -1;
+
+    //Reference point naming
+    //Abscissa = Horizontal Position (column)
+    //Ordinate = Vertical Position   (row)
+    public $point_abscissa_top    = 0;
+    public $point_abscissa_bottom = 0;
+    public $point_ordinate_left   = 0;
+    public $point_ordinate_right  = 0;
+
+    // PHP Can only have one constructor - This is kept for documentation for now
+    // Based on original config - horizontal & vertical
+    //function __construct($horizontal_number, $vertical_number){
+    //    // Strip Number       = 1 -> 20
+    //    // $horizontal_number = 0 or 1
+    //    // $vertical_number   = 0 -> 9
+    //
+    //    $this->strip_number_column = $vertical_number;
+    //    $this->strip_number_row = $horizontal_number;
+    //
+    //    $this->set_strip_number_from_locations();
+    //
+    //    $this->log_strip_number();
+    //
+    //    $this->set_key_plot_points();
+    //}
+
+    // based on strip number
+    function __construct($strip_number){
+        // Strip Number       = 1 -> 20
+        // $horizontal_number = 0 or 1
+        // $vertical_number   = 0 -> 9
+
+        $this->strip_number = $strip_number;
+
+        $this->log_strip_number();
+
+        $this->set_strip_locations_from_number();
+        $this->set_key_plot_points();
+    }
+
+    function log_strip_number(){
+        $message = __METHOD__ . ':: ' . "Strip Number: " . $this->strip_number;
+
+        //syslog is elsewhere
+        //syslog(LOG_INFO, 'S' . $message);
+
+        //This is the simple way to get a debug messageintot he log
+        error_log($message);
+    }
+
+    function set_key_plot_points(){
+        if ($this->strip_number == -1) {
+            throw new Exception(__METHOD__ . ':: Not Set: strip_number');
+        }
+        if ($this->strip_number_column == -1) {
+            throw new Exception(__METHOD__ . ':: Not Set: strip_number_column');
+        }
+        if ($this->strip_number_row == -1) {
+            throw new Exception(__METHOD__ . ':: Not Set: strip_number_row');
+        }
+
+        // Calculate top left point from strip_number or row/colum position
+        $this->point_abscissa_top  = $this->base_margin_top   + ( $this->base_row_offset    * $this->strip_number_row);
+        $this->point_ordinate_left = $this->base_margin_left  + ( $this->base_column_offset * $this->strip_number_column);
+
+        // Calculate rest from top left and fixed attributed
+        $this->point_abscissa_bottom = $this->point_abscissa_top  + $this->box_height;
+        $this->point_ordinate_right  = $this->point_ordinate_left + $this->box_width;
+    }
+
+    function set_strip_number_from_locations(){
+        if ($this->strip_number_column == -1) {
+            throw new Exception(__METHOD__ . ':: Not Set: strip_number_column');
+        }
+        if ($this->strip_number_row == -1) {
+            throw new Exception(__METHOD__ . ':: Not Set: strip_number_row');
+        }
+
+        $this->strip_number = ($this->strip_number_row + 1) + ($this->strip_number_column * 10);
+    }
+
+    function set_strip_locations_from_number(){
+        if ($this->strip_number == -1) {
+            throw new Exception(__METHOD__ . ':: Not Set: strip_number');
+        }
+
+        $column_multiplier = 0;
+        if ($this->strip_number > 10) {
+            $column_multiplier = 1;
+        }
+
+        $this->strip_number_column = $column_multiplier; // 1 if there is more than 10
+        $this->strip_number_row = ($this->strip_number - 1) - ($column_multiplier * 10); // -1 from the strip number (plus a removal of everything extra over 10)
+    }
+
+    public function draw_lines_top_and_bottom(){
+
+        $message = __METHOD__ . ':: NOT IMPLEMENTED';
+
+        //throw new Exception($message); // Breaks flow
+        error_log($message);             // Flow continues
+
+        // Need to work out inclusion/relationship with pdf printer from here
+        //$pdf->Line($this->point_abscissa_top,    $this->point_ordinate_left, $this->point_abscissa_top,    $this->point_ordinate_right);
+        //$pdf->Line($this->point_abscissa_bottom, $this->point_ordinate_left, $this->point_abscissa_bottom, $this->point_ordinate_right);
+    }
+
+}
+
+// #########################################
+// End Strip Printer Class
+// #########################################
+
 switch ($ts_manager->labeltype) {
     case "text":
 
@@ -114,6 +254,10 @@ switch ($ts_manager->labeltype) {
                 // Pick which record/strip to print based on which cell we are working on
                 // ####################################################
                 $recordtoprint = (($horiz * 10) + $vert + 1);
+
+                $ts_printer = new strip_printer($recordtoprint);
+
+                $ts_printer->draw_lines_top_and_bottom();
 
                 // ####################################################
                 // Skip if it's empty (ink saver)
@@ -132,9 +276,6 @@ switch ($ts_manager->labeltype) {
                     $pdf->SetLineWidth(2);
                     $pdf->SetDrawColor($stripr, $stripg, $stripb);
                     $pdf->Line(18 + $horiz * 288, 22 + $vert * 72, 234 + $horiz * 288, 22 + $vert * 72);
-                    if ($vert > 0) {
-                        $pdf->Line(18 + $horiz * 288, 22 + $vert * 72, 234 + $horiz * 288, 22 + $vert * 72);
-                    }
                     $pdf->Line(18 + $horiz * 288, 90 + $vert * 72, 234 + $horiz * 288, 90 + $vert * 72);
                     // #########################################
                     // End Top and Bottom Line Routine
